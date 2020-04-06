@@ -34,24 +34,40 @@ laurancy_distArea2 <- inner_join(laurancy_all, site_dist_area)
 as_factor(laurancy_distArea$usgs_gage)
 as_factor(laurancy_distArea2$usgs_gage)
 
-# add column to specify whether asian clams present at site
+# add column to specify whether asian clams present at site 
 laurancy_distArea2 <- laurancy_distArea2 %>%
-  # need to figure out how to specify if "BKY" is in the column that it qualifies as "yes"!!!
-  mutate(clams = ifelse(obs_id %in% c("BKY"), "yes", "no"))
+  #specify that if "BKY" is in the column that it qualifies as "yes"!!!
+  mutate(clams = ifelse(grepl("BKY", laurancy_distArea2$obs_id), "yes", "no"))
 
+# change values in 'clams' column for unknown sites to 'unknown'
+laurancy_distArea2[23, "clams"] <- "unknown"
+laurancy_distArea2[25, "clams"] <- "unknown"
+laurancy_distArea2[26, "clams"] <- "unknown"
+laurancy_distArea2[27, "clams"] <- "unknown"
+
+
+  
 SUMP <- laurancy_distArea2 %>%
   filter(water_body != "Cow Cr") 
 
+#Created different subset of data to focus only on which sites were at which distance to compare to graph
+SUMP2 <- SUMP %>%
+  select(obs_id, total_count, riv_dist_km) 
+
+SUMP2 <- SUMP2[order(SUMP2$riv_dist_km),]
   
-ggplot(laurancy_distArea_SUMP) + 
-  geom_point(aes(laurancy_distArea_SUMP$riv_dist_km, log(laurancy_distArea_SUMP$total_count))) +
+
+
+  
+ggplot(SUMP) + 
+  geom_point(aes(SUMP$riv_dist_km, log(SUMP$total_count))) +
   theme(axis.text.y = element_text(face = "bold")) +
   xlab("River Distance (km)") + 
   ylab("log(Mussel Abundance)") + ggtitle("Mussel Abundance on the South Umpqua River, OR") 
 
 
-# This one is good! 
-ggplot(laurancy_distArea_SUMP, aes(laurancy_distArea_SUMP$riv_dist_km, log(laurancy_distArea_SUMP$total_count), color = usgs_gage)) + 
+# This one is good! Abundance VS River Distance w/ Points colored by gage
+ggplot(SUMP, aes(SUMP$riv_dist_km, log(SUMP$total_count), color = usgs_gage)) + 
   geom_point() +
   stat_summary(fun.data=mean_cl_normal) + 
   geom_smooth(method='lm', formula= y~x, aes(group=1)) +
@@ -59,11 +75,19 @@ ggplot(laurancy_distArea_SUMP, aes(laurancy_distArea_SUMP$riv_dist_km, log(laura
   xlab("River Distance (km)") + 
   ylab("log(Mussel Abundance)") + ggtitle("Mussel Abundance on the South Umpqua River, OR")
 
+# Abundance VS River Distance w/ Points colored by clams status
+ggplot(SUMP, aes(SUMP$riv_dist_km, SUMP$total_count, color = clams)) + 
+  geom_point() +
+  theme(axis.text.y = element_text(face = "bold")) +
+  xlab("River Distance (km)") + 
+  ylab("Mussel Abundance") + ggtitle("Mussel Abundance & Invasive Asian Clam Presence \nat Sites on the South Umpqua River, OR") + 
+  scale_y_log10()
 
 
 
-ggplot(laurancy_distArea_SUMP, aes(laurancy_distArea_SUMP$riv_dist_km, log(laurancy_distArea_SUMP$total_count))) +
-  geom_point(aes(color = factor(laurancy_distArea_SUMP$usgs_gage))) + 
+
+ggplot(SUMP, aes(SUMP$riv_dist_km, log(SUMP$total_count))) +
+  geom_point(aes(color = factor(SUMP$usgs_gage))) + 
   theme(axis.text.y = element_text(face = "bold")) +
   xlab("River Distance (km)") + 
   ylab("log(Mussel Abundance)") + ggtitle("Mussel Abundance as a Function of River Distance") 
@@ -71,7 +95,7 @@ ggplot(laurancy_distArea_SUMP, aes(laurancy_distArea_SUMP$riv_dist_km, log(laura
 
 
 
-ggplot(laurancy_distArea_SUMP, aes(riv_dist_km, (total_count))) +
+ggplot(SUMP, aes(riv_dist_km, (total_count))) +
   geom_point(aes(color = factor(usgs_gage))) + 
   theme(axis.text.y = element_text(face = "bold")) +
   xlab("River Distance (km)") + 
