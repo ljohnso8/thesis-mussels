@@ -1,0 +1,28 @@
+usgs_site_num,site_name,reach,armoring_ratio,perc_slpe_H20surf,utm_east,utm_north,zone
+15,Umpqua Sand and Gravel Bar,Roseburg,1.46,0.072,465903,4789440,10
+16,Doyle Lane Bar,Roseburg,,0.095,466433,4785587,10
+17,Elk Island Bar,Roseburg,,0.035,471768,4784474,10
+18,Little Valley Bar,Roseburg,1.39,0.078,468025,4780098,10
+19,Stratton Bar,Roseburg,2.5,0.054,466122,4777146,10
+20,Roberts Mountain Bar,Roseburg,2.32,0.081,467617,4772837,10
+21,Civil Bend Bar,Roseburg,,0.071,464339,4772592,10
+22,Willis Creek Bar,Roseburg,,0.101,466162,4770427,10
+23,Doerner Bridge Bar,Roseburg,,0.128,468433,4769711,10
+24,Weigle Bar,Roseburg,1.72,0.082,469804,4768231,10
+25,Booth Hill Bar,Roseburg,,0.118,473043,4765770,10
+26,Myrtle Creek Bridge Bar,Roseburg,,0.165,475854,4763649,10
+27,Western Bar,Roseburg,3.93,0.149,475533,4763047,10
+28,Missouri Bottom Bar,Roseburg,,0.114,471545,4758470,10
+29,Lawson Bar,Roseburg,1.06,0.09,473188,4755958,10
+30,Gazley East,Days Creek,2.87,0.145,473514,4754749,10
+31,"Stanton Park Bar, Right",Days Creek,1.08,0.151,476226,4755096,10
+32,Jack's Bar,Days Creek,,0.173,480071,4755208,10
+33,Days Creek Bridge Bar,Days Creek,,,485833,4757865,10
+34,Days Creek Bar,Days Creek,2.6,0.237,486057,4755125,10
+35,Bennett Bar,Days Creek,,0.313,489079,4753870,10
+36,Lavadoure Creek Road Bar,Days Creek,3.61,0.233,491123,4754071,10
+37,Ludwig Bar,Days Creek,,0.409,493882,4753570,10
+38,Milo Bridge Bar,Days Creek,,0.34,496875,4753542,10
+39,Old Bridge Bar,Days Creek,,0.381,500149,4753982,10
+40,Parking Area Bar,Days Creek,1.73,0.337,500694,4753221,10
+41,Tiller Bar,Days Creek,,,503890,4752732,10

@@ -1,0 +1,42 @@
+obs_id,site_id,obs_type,water_body,usgs_gage,species_comm,total_count,area,Y,X,datum,obs_date
+BKY0101,BKY01,systematic sample,S Umpqua,Brockway,western pearlshell,40,120,43.079268,-123.38823,WGS84,7/21/18
+BKY0102,BKY01,visual,S Umpqua,Brockway,western pearlshell,5,15,43.08073,-123.38642,WGS84,6/14/18
+BKY0103,BKY01,visual,S Umpqua,Brockway,western pearlshell,2,60,43.07939,-123.38733,WGS84,7/21/18
+BKY0201,BKY02,visual,S Umpqua,Brockway,western pearlshell,4,7.5,43.07161,-123.37118,WGS84,9/11/18
+BKY0301,BKY03,visual,S Umpqua,Brockway,western pearlshell,9,75,43.064119,-123.357484,WGS84,7/21/18
+BKY0302,BKY03,visual,S Umpqua,Brockway,western pearlshell,2,30,43.063356,-123.357287,WGS84,7/22/18
+BKY0303,BKY03,visual,S Umpqua,Brockway,western pearlshell,4,200,43.062444,-123.354012,WGS84,7/21/18
+BKY0304,BKY03,visual,S Umpqua,Brockway,western pearlshell,12,210,43.063694,-123.352068,WGS84,7/21/18
+BKY0401,BKY04,visual,S Umpqua,Brockway,western pearlshell,1,0.25,43.048726,-123.328327,WGS84,9/12/18
+BKY0402,BKY04,visual,S Umpqua,Brockway,western pearlshell,2,10,43.04727,-123.328733,WGS84,9/12/18
+BKY0403,BKY04,visual,S Umpqua,Brockway,western pearlshell,1,0.25,43.046412,-123.329169,WGS84,9/12/18
+BKY0404,BKY04,visual,S Umpqua,Brockway,western pearlshell,2,0.25,43.045457,-123.329596,WGS84,9/12/18
+TIL0201,TIL02,systematic sample,S Umpqua,Tiller,floater,364,52.5,42.93426,-123.03869,WGS84,7/11/18
+TIL0202,TIL02,visual,S Umpqua,Tiller,western pearlshell,1,0.25,42.933487,-123.03795,WGS84,7/11/18
+TIL0301,TIL03,systematic sample,S Umpqua,Tiller,western pearlshell,86978,931.84,42.939444,-123.00241,WGS84,7/16/18
+TIL0302,TIL03,visual,S Umpqua,Tiller,western pearlshell,60,2.5,42.939892,-123.003081,WGS84,7/16/18
+COW0101,COW01,systematic sample,Cow Cr,Riddle,western pearlshell,112,43,42.89284,-123.53474,WGS84,6/14/18
+COW0102,COW01,visual,Cow Cr,Riddle,western pearlshell,1,0.25,42.891895,-123.535178,WGS84,7/20/18
+COW0103,COW01,visual,Cow Cr,Riddle,western pearlshell,1,0.25,42.8896,-123.537688,WGS84,7/20/18
+COW0104,COW01,visual,Cow Cr,Riddle,floater,1,0.25,42.89333,-123.53346,WGS84,9/18/18
+COW0201,COW02,visual,Cow Cr,Riddle,western pearlshell,2,0.5,42.865846,-123.578904,WGS84,7/20/18
+GOAN_BoomerHill,MAFA_BoomerHill,shell,S Umpqua,Brockway,western ridged,1,NA,43.04605426,-123.3304367,NAD27,8/24/06
+GOAN_DaysChute,MAFA_DaysChute,shell,S Umpqua,Tiller,western ridged,1,NA,42.96130519,-123.176492,NAD27,8/31/06
+MAFA_Milo,MAFA_Milo,shell,S Umpqua,Tiller,western pearlshell,1,NA,42.93283314,-123.0409685,NAD27,8/1/07
+MAFA_CowCr,MAFA_CowCr,shell,Cow Cr,Riddle,western pearlshell,0,NA,42.89228951,-123.5372615,NAD27,8/2/07
+MAFA_BoomerHill,MAFA_BoomerHill,visual,S Umpqua,Brockway,western pearlshell,10,NA,43.04605426,-123.3304367,NAD27,11/7/06
+MAFA_CanyonvillePk,MAFA_CanyonvillePk,visual,S Umpqua,Tiller,western pearlshell,4,1,42.94249768,-123.2632294,NAD27,8/7/06
+MAFA_CoffeCr1,MAFA_CoffeeCr1,visual,S Umpqua,Tiller,western pearlshell,3000,38,42.94129643,-123.0021327,NAD27,8/29/06
+MAFA_DaysChute1,MAFA_DaysChute,visual,S Umpqua,Tiller,western pearlshell,60,3,42.96098072,-123.1766749,NAD27,8/31/06
+MAFA_DaysChute2,MAFA_DaysChute,visual,S Umpqua,Tiller,western pearlshell,600,30,42.96109786,-123.1766262,NAD27,8/31/06
+MAFA_GrassyBeach,MAFA_GrassyBeach,visual,S Umpqua,Tiller,western pearlshell,16,2,42.94505765,-123.1310808,NAD27,8/14/06
+MAFA_HappyValley1,MAFA_HappyValley,visual,S Umpqua,Brockway,western pearlshell,12,3,43.16492906,-123.3932227,NAD27,8/11/06
+MAFA_HappyValley2,MAFA_HappyValley,visual,S Umpqua,Brockway,western pearlshell,2,1,43.16506451,-123.3931129,NAD27,8/11/06
+MAFA_KBarRanch,MAFA_KBarRanch,visual,S Umpqua,Brockway,western pearlshell,3,1,43.06534695,-123.3561961,NAD27,8/15/06
+MAFA_OldBridge2,MAFA_OldBridge,visual,S Umpqua,Tiller,western pearlshell,8,1,42.93656837,-122.9916293,NAD27,8/19/06
+MAFA_OldBridgeSampleSite,MAFA_OldBridge,visual,S Umpqua,Tiller,western pearlshell,200,20,42.9389728,-122.9919722,NAD27,8/10/06
+MAFA_SaltCr,MAFA_SaltCr,visual,S Umpqua,Tiller,western pearlshell,3,NA,42.93477238,-122.9449366,NAD27,8/25/06
+MAFA_ShafferRanch,MAFA_ShafferRanch,visual,S Umpqua,Tiller,western pearlshell,200,10,42.94622189,-123.0101616,NAD27,8/8/06
+MAFA_Tiller3,MAFA_Tiller3,visual,S Umpqua,Tiller,western pearlshell,2,NA,42.95542356,-122.9064847,NAD27,8/25/06
+MAFA_WiegleRd,MAFA_WiegleRd,visual,S Umpqua,Brockway,western pearlshell,1,NA,43.07534947,-123.3710308,NAD27,8/30/06
+ZERO_UmpConf,ZERO_UmpConf,NA,S Umpqua,Brockway,NA,0,NA,43.265952,-123.448334,WGS84,8/1/06

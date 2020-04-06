@@ -16,5 +16,25 @@ lauradata_sel <- lauradata %>%
 nancydata_sel <- duncandata %>%
   select(obs_id,obs_type,water_body,species_comm,total_count,area,datum,Y,X,obs_date)
 
-# Join datasets together
-density <- left_join(lauradata_sel, nancydata_sel, by = "obs_id")
+# Bind datasets together and create 2 different datasets for comparing densities of only visual observations VS visual + sampled beds combined
+density <- bind_rows(lauradata_sel, nancydata_sel)
+density_vis <- density %>%
+  filter(obs_type == "visual")
+density_all <- density%>%
+  filter(obs_type != "shell" )
+
+#Add columns with mutate to compare different density calculations ()
+density_vis <- density_vis %>%
+  mutate(density1 = total_count/75) %>%
+  mutate(density2 = total_count/43) %>%
+  mutate(density3 = ifelse(area >= 2, total_count/area, total_count/75))
+
+#Export density_all file
+#write.table(density_all, "/Users/williamjohnson/Desktop/Laura/Mussels/Research/field_data/densityALL.txt", sep="\t", col.names = NA)
+
+ggplot(subset(density_vis), aes(x = log(density3))) + geom_histogram(bins = 15)
+
+
+hist(density_vis$density3, bin = 10)
+
+
