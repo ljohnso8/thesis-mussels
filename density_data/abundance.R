@@ -44,11 +44,15 @@ laurancy_distArea2[23, "clams"] <- "unknown"
 laurancy_distArea2[25, "clams"] <- "unknown"
 laurancy_distArea2[26, "clams"] <- "unknown"
 laurancy_distArea2[27, "clams"] <- "unknown"
+laurancy_distArea2[28, "clams"] <- "yes"
+laurancy_distArea2[29, "clams"] <- "yes"
+
 
 
   
 SUMP <- laurancy_distArea2 %>%
-  filter(water_body != "Cow Cr") 
+  filter(water_body != "Cow Cr") %>%
+  filter(obs_id != "MAFA_KBarRanch" & obs_id != "MAFA_WiegleRd" & obs_id != "MAFA_CoffeCr1" & obs_id != "MAFA_BoomerHill")
 
 #Created different subset of data to focus only on which sites were at which distance to compare to graph
 SUMP2 <- SUMP %>%
