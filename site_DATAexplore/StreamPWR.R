@@ -14,7 +14,7 @@ streampwr2 <- streampwr %>%
 #### VISUALIZATION OF RIVER DISTANCE (KM) VS STREAM PWR (2 YR) for the South Umpqua 
 
 # Join abundance and stream pwr datasets on site_id (need to bring in site id variable)
-AbunPwr <- inner_join(abundance, streampwr, by = "site_id")
+AbunPwr <- inner_join(abundance, streampwr2, by = "site_id")
 
 # Join AbunPwr and distance datasets by obs_id
 AbunPwrDist <- inner_join(AbunPwr, dist, by = "obs_id") 
