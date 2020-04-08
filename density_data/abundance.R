@@ -2,7 +2,7 @@ setwd("/Users/williamjohnson/Desktop/Laura/Hallett_Lab/Repositories/thesis-musse
 library(tidyverse)
 
 #read in csv of my and Nancy's data PLUS site distance/basin area file
-duncandata <- as.tibble(read_tsv("LatLongduncandata.txt", col_names = TRUE)) %>%
+duncandata <- as.tibble(read_csv("LatLongduncandataV2.csv", col_names = TRUE)) %>%
   rename(obs_num = X1) %>%
   rename(datum = Datum)
 lauradata <- as.tibble(read_csv("SUMP_densitydata_2018.csv", col_names = TRUE)) %>%
@@ -23,6 +23,11 @@ laurancy_vis <- laurancy %>%
   filter(obs_type == "visual")
 laurancy_all <- laurancy %>%
   filter(obs_type != "shell" )
+
+# Write laurancy file to folders (4/8/2020: I wrote this file and then subsequently modified it to an updated format that 
+##### is different than the one created below: I added site_id column)
+#write.table(laurancy, file = "laurancy.csv", sep = ",", col.names = TRUE)
+          
 
 #Join laurancy and distance_area datasets
 laurancy_distArea2 <- inner_join(laurancy_all, site_dist_area)
