@@ -28,7 +28,7 @@ SPLUdb_2 <- SPLUdb %>% select(av_SLPE_gradient:prc_TH)
 SPLUhuc12_2 <- SPLUhuc12 %>% select(av_SLPE_gradient:prc_TH)
 SPLUdbhuc12_2 <- SPLUdbhuc12 %>% select(av_SLPE_gradient:HUC12prc_TH)
 
-# run PCA on streampwr
+############################# run PCA on streampwr ############################################################
 sp_rda <- rda(na.omit(streampwr_2), scale = TRUE)   
 
 # extract PC values to use later
@@ -283,7 +283,7 @@ ggplot(cog, aes(x=PC1, y=PC2))+
   theme_bw() +theme(panel.grid.major=element_blank(),panel.grid.minor=element_blank(),
                     text=element_text(size = 20))+ 
   xlab(paste("Axis 1 (",sprintf("%.1f",SPLUhuc12_rda$CA$eig["PC1"]/SPLUhuc12_rda$tot.chi*100,3),"%)",sep="")) +
-  ylab(paste("Axis 2 (",sprintf("%.1f",SPLUhuc12$CA$eig["PC2"]/SPLUhuc12_rda$tot.chi*100,3),"%)",sep="")) 
+  ylab(paste("Axis 2 (",sprintf("%.1f",SPLUhuc12_rda$CA$eig["PC2"]/SPLUhuc12_rda$tot.chi*100,3),"%)",sep="")) 
 
 #merge abundance data with SP & HUC12 land use PC scores
 #be sure that you keep the order the same throughout this!!
