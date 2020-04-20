@@ -1,6 +1,8 @@
 setwd("/Users/williamjohnson/Desktop/Laura/Hallett_Lab/Repositories/thesis-mussels/site_DATAexplore")
 library(tidyverse)
 library(vegan)
+library(psych)
+library(GGally)
 
 #Bring in needed files... site/abundance info, stream power info, land cover info. Env. variables are in wide format.
 # Env. variable dataframe observation order exactly matches observation order in "ord_obsabun.csv" file.
@@ -374,3 +376,153 @@ ggplot() + geom_point(aes(landDB_siteout$PC1, sp_siteout$PC1)) +
 # Land Use HUC12 Vs Stream Power
 ggplot() + geom_point(aes(landHUC12_siteout$PC1, sp_siteout$PC1)) + 
   ggtitle("Land Use HUC12 VS Stream Power PCA Axis 1 Values")
+
+
+#################### Correlation tests between PCA axis 1 values of env. variables ########################
+
+print(corr.test(landDB_siteout$PC1, landHUC12_siteout$PC1), short=FALSE)
+
+# create new df that has columns of pca axis 1 values from env. variables
+pca_df <- cbind(landDB_siteout$PC1, landHUC12_siteout$PC1, sp_siteout$PC1) 
+pca_df <- as.tibble(pca_df) %>%
+  rename(landDB = V1, landHUC12 = V2, streampwr = V3)
+
+ggpairs(pca_df, lower = list(continuous= "smooth"))
+
+
+###################### NEW PCA WITH ONLY VARIABLES I THINK ARE IMPORTANT ####################################
+# Create new dataframe that is only env. variables I think are most important
+ultord <- as.tibble(cbind(streampwr_2$Sstrpwr_2yr, streampwr_2$Sstrpwr_10yr, streampwr_2$Sstrpwr_25yr, 
+                          streampwr_2$Sstrpwr_5perc, landhuc12_2$prc_frst, landhuc12_2$prc_Tdvlp, 
+                          landhuc12_2$prc_ag, landhuc12_2$prc_TH)) %>%
+  rename(Ssp2yr = V1, Ssp10yr = V2, Ssp25yr = V3, Ssp5perc = V4, Pfrst = V5, Pdvlp = V6, Pag = V7, Pth = V8) #Rename columns
+row.names(ultord) <- obsabun$obs_id # Rename rows
+
+#create a separate ultord df that has a column of obs_id so it can be joined with ultord_siteout in PCA (below)
+ultord2 <- add_column(ultord, obsabun$obs_id)
+ultord2 <- ultord2 %>%
+  rename(obs_id = `obsabun$obs_id`)
+###################### ULTORD ##################################################3
+ultord_rda <- rda(na.omit(ultord), scale = TRUE)   
+
+# extract PC values to use later
+ultord_siteout <- as.data.frame(scores(ultord_rda, choices=c(1,2), display=c("sites"))) #these will be your sites
+ultord_siteout$ID<-rownames(ultord_siteout)
+ultord_siteout$obs_id <- rownames(ultord)
+
+ultord_enviroout<-as.data.frame(scores(ultord_rda, choices=c(1,2), display=c("species"))) ##these will be your environmental var.
+ultord_enviroout$type<-"land use variables"
+ultord_enviroout$name<-rownames(ultord_enviroout)
+
+# merge PC axes with drainage basin land use env. data
+zog <- left_join(ultord2, ultord_siteout) 
+
+##Plot PCA showing spread of env. variables (DB land use) by observation locations
+
+ggplot(zog, aes(x=PC1, y=PC2))+ 
+  geom_hline(aes(yintercept=0), color="grey") + 
+  geom_vline(aes(xintercept=0), color="grey") +
+  #geom_text(aes(label = obs_id), size = 5) +   #"color = func" removed from inside aes() on this line
+  # scale_color_manual(values = c("grey20", "grey70")) +
+  geom_segment(data = ultord_enviroout,
+               aes(x = 0, xend =  PC1,
+                   y = 0, yend =  PC2),
+               arrow = arrow(length = unit(0.25, "cm")), colour = "black") + #grid is required for arrow to work.
+  geom_text(data = ultord_enviroout,
+            aes(x=  PC1*1.2, y =  PC2*1.2, #we add 10% to the text to push it slightly out from arrows
+                label = name), #otherwise you could use hjust and vjust
+            size = 6,
+            hjust = 0.5, 
+            color="black") + 
+  theme_bw() +theme(panel.grid.major=element_blank(),panel.grid.minor=element_blank(),
+                    text=element_text(size = 20))+ 
+  xlab(paste("Axis 1 (",sprintf("%.1f",ultord_rda$CA$eig["PC1"]/ultord_rda$tot.chi*100,3),"%)",sep="")) +
+  ylab(paste("Axis 2 (",sprintf("%.1f",ultord_rda$CA$eig["PC2"]/ultord_rda$tot.chi*100,3),"%)",sep="")) 
+
+#merge abundance data with ultimate ordiation PC scores
+#be sure that you keep the order the same throughout this!!
+ultord_siteout$abundance <- obsabun$total_count
+
+ggplot(data = ultord_siteout, aes(x=PC1, y=abundance))+
+  #stat_smooth_func(geom="text",method="lm",hjust=0,parse=TRUE, aes(group=1)) +
+  geom_point()+
+  theme_bw()+
+  #scale_color_manual(values=c("tomato", "green3", "dodgerblue"), guide = guide_legend(title = "Treatment"), #change legend title
+  #labels=c("Mixed", "Forb", "Grass"))+ #change labels in the legend)+
+  xlab("UltOrd PC1 Scores")+
+  ylab("Freshwater Mussel Abundance")+
+  #xlim(40,100)+
+  #ylim(0,100)
+  geom_smooth(method="lm", formula= y ~ x, se=FALSE, color="black", aes(group=1)) +
+  scale_y_log10() + 
+  ggtitle("UltOrd Environmental Variables \nPCA Regression VS Mussel Abundance")
+
+###################### NEW PCA WITH ONLY VARIABLES I THINK ARE IMPORTANT ####################################
+# Create new dataframe that is only env. variables I think are most important
+ultimate <- as.tibble(cbind(streampwr_2$Sstrpwr_2yr, streampwr_2$Sstrpwr_10yr, streampwr_2$Sstrpwr_25yr, 
+                          streampwr_2$Sstrpwr_5perc, landDB_2$prc_frst, landDB_2$prc_Tdvlp, 
+                          landDB_2$prc_ag, landDB_2$prc_TH)) %>%
+  rename(Ssp2yr = V1, Ssp10yr = V2, Ssp25yr = V3, Ssp5perc = V4, Pfrst = V5, Pdvlp = V6, Pag = V7, Pth = V8) #Rename columns
+row.names(ultimate) <- obsabun$obs_id # Rename rows
+
+#create a separate ultimate df that has a column of obs_id so it can be joined with 
+#         ultimate_siteout in PCA (below)
+ultimate2 <- add_column(ultimate, obsabun$obs_id)
+ultimate2 <- ultimate2 %>%
+  rename(obs_id = `obsabun$obs_id`)
+
+###################### ULTIMATE PCA ##################################################3
+ultimate_rda <- rda(na.omit(ultimate), scale = TRUE)   
+
+# extract PC values to use later
+ultimate_siteout <- as.data.frame(scores(ultimate_rda, choices=c(1,2), display=c("sites"))) #these will be your sites
+ultimate_siteout$ID<-rownames(ultimate_siteout)
+ultimate_siteout$obs_id <- rownames(ultimate)
+
+ultimate_enviroout<-as.data.frame(scores(ultimate_rda, choices=c(1,2), display=c("species"))) ##these will be your environmental var.
+ultimate_enviroout$type<-"land use variables"
+ultimate_enviroout$name<-rownames(ultimate_enviroout)
+
+# merge PC axes with drainage basin land use env. data
+xog <- left_join(ultimate2, ultimate_siteout) 
+
+##Plot PCA showing spread of env. variables by observation locations
+
+ggplot(xog, aes(x=PC1, y=PC2))+ 
+  geom_hline(aes(yintercept=0), color="grey") + 
+  geom_vline(aes(xintercept=0), color="grey") +
+  geom_text(aes(label = obs_id), size = 5) +   #"color = func" removed from inside aes() on this line
+  # scale_color_manual(values = c("grey20", "grey70")) +
+  geom_segment(data = ultimate_enviroout,
+               aes(x = 0, xend =  PC1,
+                   y = 0, yend =  PC2),
+               arrow = arrow(length = unit(0.25, "cm")), colour = "black") + #grid is required for arrow to work.
+  geom_text(data = ultimate_enviroout,
+            aes(x=  PC1*1.2, y =  PC2*1.2, #we add 10% to the text to push it slightly out from arrows
+                label = name), #otherwise you could use hjust and vjust
+            size = 6,
+            hjust = 0.5, 
+            color="black") + 
+  theme_bw() +theme(panel.grid.major=element_blank(),panel.grid.minor=element_blank(),
+                    text=element_text(size = 20))+ 
+  xlab(paste("Axis 1 (",sprintf("%.1f",ultimate_rda$CA$eig["PC1"]/ultimate_rda$tot.chi*100,3),"%)",sep="")) +
+  ylab(paste("Axis 2 (",sprintf("%.1f",ultimate_rda$CA$eig["PC2"]/ultimate_rda$tot.chi*100,3),"%)",sep="")) 
+
+#merge abundance data with ultimate ordiation PC scores
+#be sure that you keep the order the same throughout this!!
+ultimate_siteout$abundance <- obsabun$total_count
+
+ggplot(data = ultimate_siteout, aes(x=PC1, y=abundance))+
+  #stat_smooth_func(geom="text",method="lm",hjust=0,parse=TRUE, aes(group=1)) +
+  geom_point()+
+  theme_bw()+
+  #scale_color_manual(values=c("tomato", "green3", "dodgerblue"), guide = guide_legend(title = "Treatment"), #change legend title
+  #labels=c("Mixed", "Forb", "Grass"))+ #change labels in the legend)+
+  xlab("UltOrd PC1 Scores")+
+  ylab("Freshwater Mussel Abundance")+
+  #xlim(40,100)+
+  #ylim(0,100)
+  geom_smooth(method="lm", formula= y ~ x, se=FALSE, color="black", aes(group=1)) +
+  scale_y_log10() + 
+  ggtitle("Ultimate Environmental Variables \nPCA Regression VS Mussel Abundance")
+  
