@@ -213,7 +213,7 @@ jog <- left_join(SPLUdb, SPLUdb_siteout)
 ggplot(jog, aes(x=PC1, y=PC2))+ 
   geom_hline(aes(yintercept=0), color="grey") + 
   geom_vline(aes(xintercept=0), color="grey") +
-  geom_text(aes(label = obs_id), size = 5) +   #"color = func" removed from inside aes() on this line
+  # geom_text(aes(label = obs_id), size = 5) +   #"color = func" removed from inside aes() on this line
   # scale_color_manual(values = c("grey20", "grey70")) +
   geom_segment(data = SPLUdb_enviroout,
                aes(x = 0, xend =  PC1,
@@ -222,9 +222,9 @@ ggplot(jog, aes(x=PC1, y=PC2))+
   geom_text(data = SPLUdb_enviroout,
             aes(x=  PC1*1.2, y =  PC2*1.2, #we add 10% to the text to push it slightly out from arrows
                 label = name), #otherwise you could use hjust and vjust
-            size = 6,
-            hjust = 0.5, 
-            color="black") + 
+           size = 6,
+           hjust = 0.5, 
+           color="black") + 
   theme_bw() +theme(panel.grid.major=element_blank(),panel.grid.minor=element_blank(),
                     text=element_text(size = 20))+ 
   xlab(paste("Axis 1 (",sprintf("%.1f",SPLUdb_rda$CA$eig["PC1"]/SPLUdb_rda$tot.chi*100,3),"%)",sep="")) +
@@ -361,4 +361,16 @@ ggplot(data = SPLUdbhuc12_siteout, aes(x=PC1, y=abundance))+
   scale_y_log10() + 
   ggtitle("Stream Pwr + DB  & HUC12 Land Environmental Variables \nPCA Regression VS Mussel Abundance")
 
+##################### Compare PC1 Axis of Env. Variables to Assess Co-linearity ############################
 
+# Land Use DB Vs Land Use Huc12
+ggplot() + geom_point(aes(landDB_siteout$PC1, landHUC12_siteout$PC1)) + 
+  ggtitle("Land Use Drainage Basin VS Land Use HUC12 PCA Axis 1 Values")
+
+# Land Use DB Vs Stream Power
+ggplot() + geom_point(aes(landDB_siteout$PC1, sp_siteout$PC1)) + 
+  ggtitle("Land Use Drainage Basin VS Stream Power PCA Axis 1 Values")
+
+# Land Use HUC12 Vs Stream Power
+ggplot() + geom_point(aes(landHUC12_siteout$PC1, sp_siteout$PC1)) + 
+  ggtitle("Land Use HUC12 VS Stream Power PCA Axis 1 Values")
