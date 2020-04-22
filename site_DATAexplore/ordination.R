@@ -443,7 +443,7 @@ ggplot(zog, aes(x=PC1, y=PC2))+
 #be sure that you keep the order the same throughout this!!
 ultord_siteout$abundance <- obsabun$total_count
 
-ggplot(data = ultord_siteout, aes(x=PC1, y=abundance))+
+ggplot(data = ultord_siteout, aes(x=PC2, y=abundance))+
   #stat_smooth_func(geom="text",method="lm",hjust=0,parse=TRUE, aes(group=1)) +
   geom_point()+
   theme_bw()+
@@ -512,7 +512,7 @@ ggplot(xog, aes(x=PC1, y=PC2))+
 #be sure that you keep the order the same throughout this!!
 ultimate_siteout$abundance <- obsabun$total_count
 
-ggplot(data = ultimate_siteout, aes(x=PC1, y=abundance))+
+ggplot(data = ultimate_siteout, aes(x=PC2, y=abundance))+
   #stat_smooth_func(geom="text",method="lm",hjust=0,parse=TRUE, aes(group=1)) +
   geom_point()+
   theme_bw()+
@@ -525,4 +525,25 @@ ggplot(data = ultimate_siteout, aes(x=PC1, y=abundance))+
   geom_smooth(method="lm", formula= y ~ x, se=FALSE, color="black", aes(group=1)) +
   scale_y_log10() + 
   ggtitle("Ultimate Environmental Variables \nPCA Regression VS Mussel Abundance")
-  
+
+
+########################### Correlation tests between env. variables #################################
+#######################################################################################################
+
+#rename columns in DB and HUC12 df's so column names specify scale of variables
+colnames(landDB) <- paste("DB", colnames(landDB), sep = "")
+colnames(landhuc12) <- paste("HUC12", colnames(landhuc12), sep = "")
+
+# create new df that has columns of env. variables (SP + ACW/ slope + DB & HUC12 LandUse)
+SP_df <- streampwr[, c(3,4,9:12)] #subset select variables from stream power dataset
+landdb_df <- landDB[,c(3:8)] #subset select variables from DB land use dataset
+landhuc12_df <- landhuc12[,c(4:9)] #subset select variables from HUC12 land use dataset
+
+#need a few env variable df's b/c combining them all in one results in illegible ggpairs graph
+spdb <- bind_cols(SP_df, landdb_df) 
+sphuc <- bind_cols(SP_df, landhuc12_df)
+dbhuc <- bind_cols(landdb_df, landhuc12_df)
+#correclation analysis
+ggpairs(spdb, lower = list(continuous= "smooth")) + theme_grey(base_size = 8)
+ggpairs(spdb, lower = list(continuous= "smooth"))
+ggpairs(spdb, lower = list(continuous= "smooth"))
