@@ -532,7 +532,7 @@ ggplot(data = ultimate_siteout, aes(x=PC2, y=abundance))+
 
 #rename columns in DB and HUC12 df's so column names specify scale of variables
 colnames(landDB) <- paste("DB", colnames(landDB), sep = "")
-colnames(landhuc12) <- paste("HUC12", colnames(landhuc12), sep = "")
+colnames(landhuc12) <- paste("H", colnames(landhuc12), sep = "")
 
 # create new df that has columns of env. variables (SP + ACW/ slope + DB & HUC12 LandUse)
 SP_df <- streampwr[, c(3,4,9:12)] #subset select variables from stream power dataset
@@ -545,5 +545,5 @@ sphuc <- bind_cols(SP_df, landhuc12_df)
 dbhuc <- bind_cols(landdb_df, landhuc12_df)
 #correclation analysis
 ggpairs(spdb, lower = list(continuous= "smooth")) + theme_grey(base_size = 8)
-ggpairs(spdb, lower = list(continuous= "smooth"))
-ggpairs(spdb, lower = list(continuous= "smooth"))
+ggpairs(sphuc, lower = list(continuous= "smooth"))
+ggpairs(dbhuc, lower = list(continuous= "smooth"))
