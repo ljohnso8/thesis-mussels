@@ -547,3 +547,23 @@ dbhuc <- bind_cols(landdb_df, landhuc12_df)
 ggpairs(spdb, lower = list(continuous= "smooth")) + theme_grey(base_size = 8)
 ggpairs(sphuc, lower = list(continuous= "smooth"))
 ggpairs(dbhuc, lower = list(continuous= "smooth"))
+
+############################## Create and Compare Models #####################################################
+##############################################################################################################
+# Define candidate variables
+abundance <- obsabun$total_count
+DB_Pforest <- landdb_df$DBprc_frst
+SP_2yr <- SP_df$Sstrpwr_2yr
+HUC_Pforest <- landhuc12_df$Hprc_frst
+HUC_Pth <- landhuc12_df$Hprc_TH
+
+mod1 <- lm(abundance ~ SP_2yr)
+mod2 <- lm(abundance ~ SP_2yr + DB_Pforest)
+mod3 <- lm(abundance ~ DB_Pforest + SP_2yr + HUC_Pforest)
+
+anova(mod1, mod2) #mod 2 does not significantly explain more variation
+anova(mod2, mod3) #mod 3 does not sig. explain more variation than model 2
+anova(mod2, mod1)
+
+#### Next step: Take a look at results of linear regressions (reference biostats HW)
+
