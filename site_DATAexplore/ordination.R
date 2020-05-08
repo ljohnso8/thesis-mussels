@@ -3,6 +3,7 @@ library(tidyverse)
 library(vegan)
 library(psych)
 library(GGally)
+library(MASS)
 
 #Bring in needed files... site/abundance info, stream power info, land cover info. Env. variables are in wide format.
 # Env. variable dataframe observation order exactly matches observation order in "ord_obsabun.csv" file.
@@ -50,7 +51,7 @@ tog <- left_join(streampwr, sp_siteout)
 ggplot(tog, aes(x=PC1, y=PC2))+ 
   geom_hline(aes(yintercept=0), color="grey") + 
   geom_vline(aes(xintercept=0), color="grey") +
-  geom_text(aes(label = obs_id), size = 5) +   #"color = func" removed from inside aes() on this line
+  #geom_text(aes(label = obs_id), size = 5) +   #"color = func" removed from inside aes() on this line
   # scale_color_manual(values = c("grey20", "grey70")) +
   geom_segment(data = sp_enviroout,
                aes(x = 0, xend =  PC1,
@@ -557,13 +558,40 @@ SP_2yr <- SP_df$Sstrpwr_2yr
 HUC_Pforest <- landhuc12_df$Hprc_frst
 HUC_Pth <- landhuc12_df$Hprc_TH
 
-mod1 <- lm(abundance ~ SP_2yr)
-mod2 <- lm(abundance ~ SP_2yr + DB_Pforest)
-mod3 <- lm(abundance ~ DB_Pforest + SP_2yr + HUC_Pforest)
+mod1 <- lm(log(abundance + .01) ~ DB_Pforest)
+mod2 <- lm(log(abundance + .01) ~ DB_Pforest+ SP_2yr)
+mod3 <- lm(log(abundance + .01) ~ DB_Pforest + SP_2yr + HUC_Pth)
+
+mod1 <- lm(log(abundance + .01) ~ SP_2yr)
 
 anova(mod1, mod2) #mod 2 does not significantly explain more variation
 anova(mod2, mod3) #mod 3 does not sig. explain more variation than model 2
-anova(mod2, mod1)
+anova(mod1, mod3)
 
 #### Next step: Take a look at results of linear regressions (reference biostats HW)
+summary(mod1)
+summary(mod2)
+summary(mod3)        # None of the model terms are significant.
 
+landDB_pc1 <- landDB_siteout$PC1
+sp_pc1 <- sp_siteout$PC1
+
+mod1 <- lm(abundance ~ landDB_pc1)
+mod2 <- lm(abundance ~ landDB_pc1 + sp_pc1)
+
+anova(mod1, mod2)
+
+summary(mod1)
+
+ggplot() + geom_point(aes(DB_Pforest, abundance)) + scale_y_log10()
+
+############################## Step-wise Regression #####################################################
+##############################################################################################################
+
+# create df that contains all candidate variables
+mydata <- as.tibble(cbind(abundance, DB_Pforest, SP_2yr, HUC_Pforest, HUC_Pth))
+
+#step-wise regression
+fit <- lm(log(abundance + .01) ~ DB_Pforest + SP_2yr + HUC_Pforest + HUC_Pth, data = mydata)
+step <- stepAIC(fit, direction = "both")
+step$anova  #display results
