@@ -1,19 +1,42 @@
 setwd("/Users/williamjohnson/Desktop/Laura/Hallett_Lab/Repositories/thesis-mussels/site_DATAexplore")
+
 library(tidyverse)
 library(vegan)
 library(psych)
 library(GGally)
-library(MASS)
+
 
 #Bring in needed files... site/abundance info, stream power info, land cover info. Env. variables are in wide format.
 # Env. variable dataframe observation order exactly matches observation order in "ord_obsabun.csv" file.
-obsabun <- as.tibble(read.csv("ord_obsabun.csv"))
-streampwr <- as.tibble(read.csv("ord_streamPWR.csv"))
+obsabun <- as.tibble(read.csv("ord_obsabun.csv"), colnames = TRUE)
+streampwr <- as.tibble(read.csv("ord_streamPWR.csv"), colnames = TRUE)
 landDB <- as.tibble(read.csv("ord_landcoverDB.csv"))
 landhuc12 <- as.tibble(read.csv("ord_landcoverHUC12.csv"))
 SPLUdb <- as.tibble(read.csv("ord_SP&LUdb.csv"))
 SPLUhuc12 <- as.tibble(read.csv("ord_SP&LUhuc12.csv"))
 SPLUdbhuc12 <- as.tibble(read.csv("ord_SP&LUdb&LUhuc12.csv"))
+
+#Remove duplicate sites from df's
+obsabun <- obsabun %>%
+  filter(! obs_id %in% c("MAFA_BoomerHill", "MAFA_CoffeCr1", "MAFA_KBarRanch", "MAFA_WiegleRd"))
+
+streampwr <- streampwr %>%
+  filter(! obs_id %in% c("MAFA_BoomerHill", "MAFA_CoffeCr1", "MAFA_KBarRanch", "MAFA_WiegleRd"))
+
+landDB <- landDB %>%
+  filter(! obs_id %in% c("MAFA_BoomerHill", "MAFA_CoffeCr1", "MAFA_KBarRanch", "MAFA_WiegleRd"))
+
+landhuc12 <- landhuc12 %>%
+  filter(! obs_id %in% c("MAFA_BoomerHill", "MAFA_CoffeCr1", "MAFA_KBarRanch", "MAFA_WiegleRd"))
+
+SPLUdb <- SPLUdb %>%
+  filter(! obs_id %in% c("MAFA_BoomerHill", "MAFA_CoffeCr1", "MAFA_KBarRanch", "MAFA_WiegleRd"))
+
+SPLUhuc12 <- SPLUhuc12 %>%
+  filter(! obs_id %in% c("MAFA_BoomerHill", "MAFA_CoffeCr1", "MAFA_KBarRanch", "MAFA_WiegleRd"))
+
+SPLUdbhuc12 <- SPLUdbhuc12 %>%
+  filter(! obs_id %in% c("MAFA_BoomerHill", "MAFA_CoffeCr1", "MAFA_KBarRanch", "MAFA_WiegleRd"))
 
 #Modify env. variable dataframes so there are no row/column names in the dataframe
 row.names(streampwr) <- obsabun$obs_id
@@ -24,12 +47,14 @@ row.names(SPLUhuc12) <- obsabun$obs_id
 row.names(SPLUdbhuc12) <- obsabun$obs_id
 
 #Delete unneeded columns in env. variable dataframes
-streampwr_2 <- streampwr %>% select(av_SLPE_gradient:Sstrpwr_5perc)
-landDB_2 <- landDB %>% select(prc_frst:prc_TH)
-landhuc12_2 <- landhuc12 %>% select(prc_frst:prc_TH)
-SPLUdb_2 <- SPLUdb %>% select(av_SLPE_gradient:prc_TH)
-SPLUhuc12_2 <- SPLUhuc12 %>% select(av_SLPE_gradient:prc_TH)
-SPLUdbhuc12_2 <- SPLUdbhuc12 %>% select(av_SLPE_gradient:HUC12prc_TH)
+# Have to specify dplyr::select for each command b/c of a clash with the 'select' function b/w dplyr and MASS libraries
+streampwr_2 <- streampwr %>% dplyr::select(av_SLPE_gradient, av_acw, Sstrpwr_2yr:Sstrpwr_5perc)
+landDB_2 <- landDB %>% dplyr::select(prc_frst:prc_TH)
+landhuc12_2 <- landhuc12 %>% dplyr::select(prc_frst:prc_TH)
+SPLUdb_2 <- SPLUdb %>% dplyr::select(av_SLPE_gradient:prc_TH)
+SPLUhuc12_2 <- SPLUhuc12 %>% dplyr::select(av_SLPE_gradient:prc_TH)
+SPLUdbhuc12_2 <- SPLUdbhuc12 %>% dplyr::select(av_SLPE_gradient:HUC12prc_TH)
+
 
 ############################# run PCA on streampwr ############################################################
 sp_rda <- rda(na.omit(streampwr_2), scale = TRUE)   
@@ -557,12 +582,13 @@ DB_Pforest <- landdb_df$DBprc_frst
 SP_2yr <- SP_df$Sstrpwr_2yr
 HUC_Pforest <- landhuc12_df$Hprc_frst
 HUC_Pth <- landhuc12_df$Hprc_TH
+HUC_Pag <- landhuc12_df$Hprc_ag
 
 mod1 <- lm(log(abundance + .01) ~ DB_Pforest)
 mod2 <- lm(log(abundance + .01) ~ DB_Pforest+ SP_2yr)
-mod3 <- lm(log(abundance + .01) ~ DB_Pforest + SP_2yr + HUC_Pth)
+mod3 <- lm(log(abundance + .01) ~ DB_Pforest + SP_2yr + HUC_Pag)
 
-mod1 <- lm(log(abundance + .01) ~ SP_2yr)
+mod4 <- lm(log(abundance + .01) ~ HUC_Pag)
 
 anova(mod1, mod2) #mod 2 does not significantly explain more variation
 anova(mod2, mod3) #mod 3 does not sig. explain more variation than model 2
@@ -572,9 +598,7 @@ anova(mod1, mod3)
 summary(mod1)
 summary(mod2)
 summary(mod3)        # None of the model terms are significant.
-
-landDB_pc1 <- landDB_siteout$PC1
-sp_pc1 <- sp_siteout$PC1
+summary(mod4)
 
 mod1 <- lm(abundance ~ landDB_pc1)
 mod2 <- lm(abundance ~ landDB_pc1 + sp_pc1)
@@ -589,9 +613,13 @@ ggplot() + geom_point(aes(DB_Pforest, abundance)) + scale_y_log10()
 ##############################################################################################################
 
 # create df that contains all candidate variables
-mydata <- as.tibble(cbind(abundance, DB_Pforest, SP_2yr, HUC_Pforest, HUC_Pth))
+mydata <- as.tibble(cbind(abundance, DB_Pforest, SP_2yr, HUC_Pforest, HUC_Pth, HUC_Pag))
 
 #step-wise regression
-fit <- lm(log(abundance + .01) ~ DB_Pforest + SP_2yr + HUC_Pforest + HUC_Pth, data = mydata)
+fit <- lm(log(abundance + .01) ~ DB_Pforest + SP_2yr + HUC_Pforest + HUC_Pth + HUC_Pag, data = mydata)
 step <- stepAIC(fit, direction = "both")
 step$anova  #display results
+
+# See what happens if TIL03 not included in the dataset......
+obsabun2 <- obsabun %>%
+  filter(obs_id != "TIL0301")
