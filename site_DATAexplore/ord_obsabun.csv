@@ -1,39 +1,39 @@
-obs_id,total_count
-BKY0101,40
-BKY0102,5
-BKY0103,2
-BKY0201,4
-BKY0301,9
-BKY0302,2
-BKY0303,4
-BKY0304,12
-BKY0401,1
-BKY0402,2
-BKY0403,1
-BKY0404,2
-TIL0201,364
-TIL0202,1
-TIL0301,86978
-TIL0302,60
-COW0101,112
-COW0102,1
-COW0103,1
-COW0104,1
-COW0201,2
-ZERO_Milo,0
-MAFA_BoomerHill,10
-CanyonPk,4
-MAFA_CoffeCr1,3000
-DaysCh1,60
-DaysCh2,600
-GrassyBch,16
-HpyVly1,12
-HpyVly2,2
-MAFA_KBarRanch,3
-OBridge2,8
-OBridge1,200
-SaltCr,3
-SfrRanch,200
-Tiller3,2
-MAFA_WiegleRd,1
-ZERO_UmpConf,0
+obs_id,total_count,basin
+BKY0101,40,lower S Umpqua
+BKY0102,5,lower S Umpqua
+BKY0103,2,lower S Umpqua
+BKY0201,4,lower S Umpqua
+BKY0301,9,lower S Umpqua
+BKY0302,2,lower S Umpqua
+BKY0303,4,lower S Umpqua
+BKY0304,12,lower S Umpqua
+BKY0401,1,lower S Umpqua
+BKY0402,2,lower S Umpqua
+BKY0403,1,lower S Umpqua
+BKY0404,2,lower S Umpqua
+TIL0201,364,upper S Umpqua
+TIL0202,1,upper S Umpqua
+TIL0301,86978,upper S Umpqua
+TIL0302,60,upper S Umpqua
+COW0101,112,Cow Cr
+COW0102,1,Cow Cr
+COW0103,1,Cow Cr
+COW0104,1,Cow Cr
+COW0201,2,Cow Cr
+ZERO_Milo,0,upper S Umpqua
+MAFA_BoomerHill,10,lower S Umpqua
+CanyonPk,4,upper S Umpqua
+MAFA_CoffeCr1,3000,upper S Umpqua
+DaysCh1,60,upper S Umpqua
+DaysCh2,600,upper S Umpqua
+GrassyBch,16,upper S Umpqua
+HpyVly1,12,lower S Umpqua
+HpyVly2,2,lower S Umpqua
+MAFA_KBarRanch,3,lower S Umpqua
+OBridge2,8,upper S Umpqua
+OBridge1,200,upper S Umpqua
+SaltCr,3,upper S Umpqua
+SfrRanch,200,upper S Umpqua
+Tiller3,2,upper S Umpqua
+MAFA_WiegleRd,1,lower S Umpqua
+ZERO_UmpConf,0,lower S Umpqua
