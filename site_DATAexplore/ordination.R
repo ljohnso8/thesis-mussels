@@ -4,6 +4,7 @@ library(tidyverse)
 library(vegan)
 library(psych)
 library(GGally)
+library(MASS)
 
 
 #Bring in needed files... site/abundance info, stream power info, land cover info. Env. variables are in wide format.
@@ -51,9 +52,9 @@ row.names(SPLUdbhuc12) <- obsabun$obs_id
 streampwr_2 <- streampwr %>% dplyr::select(av_SLPE_gradient, av_acw, Sstrpwr_2yr:Sstrpwr_5perc)
 landDB_2 <- landDB %>% dplyr::select(prc_frst:prc_TH)
 landhuc12_2 <- landhuc12 %>% dplyr::select(prc_frst:prc_TH)
-SPLUdb_2 <- SPLUdb %>% dplyr::select(av_SLPE_gradient:prc_TH)
-SPLUhuc12_2 <- SPLUhuc12 %>% dplyr::select(av_SLPE_gradient:prc_TH)
-SPLUdbhuc12_2 <- SPLUdbhuc12 %>% dplyr::select(av_SLPE_gradient:HUC12prc_TH)
+SPLUdb_2 <- SPLUdb %>% dplyr::select(av_SLPE_gradient, av_acw, Sstrpwr_2yr:prc_TH)
+SPLUhuc12_2 <- SPLUhuc12 %>% dplyr::select(av_SLPE_gradient, av_acw, Sstrpwr_2yr:prc_TH)
+SPLUdbhuc12_2 <- SPLUdbhuc12 %>% dplyr::select(av_SLPE_gradient, av_acw, Sstrpwr_2yr:HUC12prc_TH)
 
 
 ############################# run PCA on streampwr ############################################################
@@ -76,7 +77,7 @@ tog <- left_join(streampwr, sp_siteout)
 ggplot(tog, aes(x=PC1, y=PC2))+ 
   geom_hline(aes(yintercept=0), color="grey") + 
   geom_vline(aes(xintercept=0), color="grey") +
-  #geom_text(aes(label = obs_id), size = 5) +   #"color = func" removed from inside aes() on this line
+  geom_text(aes(label = obs_id), size = 5) +   #"color = func" removed from inside aes() on this line
   # scale_color_manual(values = c("grey20", "grey70")) +
   geom_segment(data = sp_enviroout,
                aes(x = 0, xend =  PC1,
@@ -207,7 +208,7 @@ ggplot(log, aes(x=PC1, y=PC2))+
 #be sure that you keep the order the same throughout this!!
 landHUC12_siteout$abundance <- obsabun$total_count
 
-ggplot(data = landHUC12_siteout, aes(x=PC1, y=abundance))+
+ggplot(data = landHUC12_siteout, aes(x=PC2, y=abundance))+
   #stat_smooth_func(geom="text",method="lm",hjust=0,parse=TRUE, aes(group=1)) +
   geom_point()+
   theme_bw()+
@@ -241,7 +242,7 @@ jog <- left_join(SPLUdb, SPLUdb_siteout)
 ggplot(jog, aes(x=PC1, y=PC2))+ 
   geom_hline(aes(yintercept=0), color="grey") + 
   geom_vline(aes(xintercept=0), color="grey") +
-  # geom_text(aes(label = obs_id), size = 5) +   #"color = func" removed from inside aes() on this line
+  geom_text(aes(label = obs_id), size = 5) +   #"color = func" removed from inside aes() on this line
   # scale_color_manual(values = c("grey20", "grey70")) +
   geom_segment(data = SPLUdb_enviroout,
                aes(x = 0, xend =  PC1,
@@ -262,7 +263,7 @@ ggplot(jog, aes(x=PC1, y=PC2))+
 #be sure that you keep the order the same throughout this!!
 SPLUdb_siteout$abundance <- obsabun$total_count
 
-ggplot(data = SPLUdb_siteout, aes(x=PC1, y=abundance))+
+ggplot(data = SPLUdb_siteout, aes(x=PC2, y=abundance))+
   #stat_smooth_func(geom="text",method="lm",hjust=0,parse=TRUE, aes(group=1)) +
   geom_point()+
   theme_bw()+
@@ -354,7 +355,7 @@ hog <- left_join(SPLUdbhuc12, SPLUdbhuc12_siteout) # And yes... even more warnin
 ggplot(hog, aes(x=PC1, y=PC2))+ 
   geom_hline(aes(yintercept=0), color="grey") + 
   geom_vline(aes(xintercept=0), color="grey") +
-  geom_text(aes(label = obs_id), size = 5) +   #"color = func" removed from inside aes() on this line
+  #geom_text(aes(label = obs_id), size = 5) +   #"color = func" removed from inside aes() on this line
   # scale_color_manual(values = c("grey20", "grey70")) +
   geom_segment(data = SPLUdbhuc12_enviroout,
                aes(x = 0, xend =  PC1,
@@ -557,7 +558,7 @@ ggplot(data = ultimate_siteout, aes(x=PC2, y=abundance))+
 #######################################################################################################
 
 #rename columns in DB and HUC12 df's so column names specify scale of variables
-colnames(landDB) <- paste("DB", colnames(landDB), sep = "")
+colnames(landDB) <- paste("D", colnames(landDB), sep = "")
 colnames(landhuc12) <- paste("H", colnames(landhuc12), sep = "")
 
 # create new df that has columns of env. variables (SP + ACW/ slope + DB & HUC12 LandUse)
@@ -577,12 +578,12 @@ ggpairs(dbhuc, lower = list(continuous= "smooth"))
 ############################## Create and Compare Models #####################################################
 ##############################################################################################################
 # Define candidate variables
-abundance <- obsabun$total_count
-DB_Pforest <- landdb_df$DBprc_frst
-SP_2yr <- SP_df$Sstrpwr_2yr
-HUC_Pforest <- landhuc12_df$Hprc_frst
-HUC_Pth <- landhuc12_df$Hprc_TH
-HUC_Pag <- landhuc12_df$Hprc_ag
+abundance <- obsabun$total_count #response variable
+DB_Pforest <- landdb_df$Dprc_frst # predictor variable (PV) 1
+SP_2yr <- SP_df$Sstrpwr_2yr  # PV 2
+HUC_Pforest <- landhuc12_df$Hprc_frst #PV 3
+HUC_Pth <- landhuc12_df$Hprc_TH # PV 4
+HUC_Pag <- landhuc12_df$Hprc_ag # PV 5
 
 mod1 <- lm(log(abundance + .01) ~ DB_Pforest)
 mod2 <- lm(log(abundance + .01) ~ DB_Pforest+ SP_2yr)
@@ -611,6 +612,8 @@ ggplot() + geom_point(aes(DB_Pforest, abundance)) + scale_y_log10()
 
 ############################## Step-wise Regression #####################################################
 ##############################################################################################################
+library(nlme)
+library(lme4)
 
 # create df that contains all candidate variables
 mydata <- as.tibble(cbind(abundance, DB_Pforest, SP_2yr, HUC_Pforest, HUC_Pth, HUC_Pag))
@@ -619,6 +622,17 @@ mydata <- as.tibble(cbind(abundance, DB_Pforest, SP_2yr, HUC_Pforest, HUC_Pth, H
 fit <- lm(log(abundance + .01) ~ DB_Pforest + SP_2yr + HUC_Pforest + HUC_Pth + HUC_Pag, data = mydata)
 step <- stepAIC(fit, direction = "both")
 step$anova  #display results
+
+############################ Stepwise Regression of Linear Mixed Model #################################################
+
+# modify mydata df to include basin categorical variable
+mydata["basin"] <- obsabun$basin
+
+fit2 <- lmer(log(abundance + .01) ~ DB_Pforest + SP_2yr + HUC_Pforest + HUC_Pth + HUC_Pag + (1|basin), data = mydata)
+step2 <- step(fit2)
+step(fit2)
+step$anova  #display results
+
 
 # See what happens if TIL03 not included in the dataset......
 obsabun2 <- obsabun %>%
