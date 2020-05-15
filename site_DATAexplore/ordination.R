@@ -571,9 +571,9 @@ spdb <- bind_cols(SP_df, landdb_df)
 sphuc <- bind_cols(SP_df, landhuc12_df)
 dbhuc <- bind_cols(landdb_df, landhuc12_df)
 #correclation analysis
-ggpairs(spdb, lower = list(continuous= "smooth")) + theme_grey(base_size = 8)
-ggpairs(sphuc, lower = list(continuous= "smooth"))
-ggpairs(dbhuc, lower = list(continuous= "smooth"))
+#ggpairs(spdb, lower = list(continuous= "smooth")) + theme_grey(base_size = 8)
+#ggpairs(sphuc, lower = list(continuous= "smooth"))
+#ggpairs(dbhuc, lower = list(continuous= "smooth"))
 
 ############################## Create and Compare Models #####################################################
 ##############################################################################################################
@@ -585,9 +585,14 @@ HUC_Pforest <- landhuc12_df$Hprc_frst #PV 3
 HUC_Pth <- landhuc12_df$Hprc_TH # PV 4
 HUC_Pag <- landhuc12_df$Hprc_ag # PV 5
 
+notil03 <- as.tibble(cbind(abundance, DB_Pforest, SP_2yr, HUC_Pth))
+
+notil03 <- notil03 %>%
+  filter(!abundance == 86978)
+
 mod1 <- lm(log(abundance + .01) ~ DB_Pforest)
-mod2 <- lm(log(abundance + .01) ~ DB_Pforest+ SP_2yr)
-mod3 <- lm(log(abundance + .01) ~ DB_Pforest + SP_2yr + HUC_Pag)
+mod2 <- lm(log(abundance + .01) ~ DB_Pforest+ SP_2yr, notil03)
+mod3 <- lm(log(abundance + .01) ~ DB_Pforest + SP_2yr + HUC_Pth) # this is the final model!
 
 mod4 <- lm(log(abundance + .01) ~ HUC_Pag)
 
@@ -612,8 +617,6 @@ ggplot() + geom_point(aes(DB_Pforest, abundance)) + scale_y_log10()
 
 ############################## Step-wise Regression #####################################################
 ##############################################################################################################
-library(nlme)
-library(lme4)
 
 # create df that contains all candidate variables
 mydata <- as.tibble(cbind(abundance, DB_Pforest, SP_2yr, HUC_Pforest, HUC_Pth, HUC_Pag))
@@ -623,17 +626,41 @@ fit <- lm(log(abundance + .01) ~ DB_Pforest + SP_2yr + HUC_Pforest + HUC_Pth + H
 step <- stepAIC(fit, direction = "both")
 step$anova  #display results
 
+# See what happens if TIL03 not included in the dataset......
+newdata <- mydata%>%
+  filter(!abundance == 86978)
+
+fit2 <- lm(log(abundance + .01) ~ DB_Pforest + SP_2yr + HUC_Pforest + HUC_Pth + HUC_Pag, data = newdata)
+step2 <- stepAIC(fit, direction = "both")
+step2$anova  #display results... suggested final model is the same as with TIL03 site included
+
+fit3 <- lm(log(abundance + .01) ~ DB_Pforest + SP_2yr + HUC_Pth, data = newdata)
+summary(fit3)
+
+
 ############################ Stepwise Regression of Linear Mixed Model #################################################
 
+# Decision that my data is too conflated to be able to use random effects!!!
+
+
 # modify mydata df to include basin categorical variable
-mydata["basin"] <- obsabun$basin
+#mydata["basin"] <- obsabun$basin
 
-fit2 <- lmer(log(abundance + .01) ~ DB_Pforest + SP_2yr + HUC_Pforest + HUC_Pth + HUC_Pag + (1|basin), data = mydata)
-step2 <- step(fit2)
-step(fit2)
-step$anova  #display results
+#fit2 <- lmer(log(abundance + .01) ~ DB_Pforest + SP_2yr + HUC_Pforest + HUC_Pth + HUC_Pag + (1|basin), data = mydata)
+#step2 <- step(fit2)
+
+############################## Visualizations ############################################
+# create dataframe that includes variables in final model
+finalmodel <- as.tibble(cbind(abundance, DB_Pforest, SP_2yr,HUC_Pth))
+# create object for final model linear regression 
+lm_finalmodel <- lm(log(abundance + .01) ~ DB_Pforest + SP_2yr + HUC_Pth, data = finalmodel) 
+# save predictions of the model in the new data frame together with variable you want to plot against
+predicted_df <- data.frame(abun_pred = predict(lm_finalmodel, finalmodel), DBforest = finalmodel$DB_Pforest)
+
+#This is the predicted line of multiple regression
+ggplot(finalmodel, aes(x = DB_Pforest, y = log(abundance))) + geom_point() +
+  geom_line(color = 'red', data = predicted_df, aes(x = DBforest, y = abun_pred))
 
 
-# See what happens if TIL03 not included in the dataset......
-obsabun2 <- obsabun %>%
-  filter(obs_id != "TIL0301")
+
+
