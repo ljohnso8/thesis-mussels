@@ -5,6 +5,7 @@ library(vegan)
 library(psych)
 library(GGally)
 library(MASS)
+library(cowplot)
 
 
 #Bring in needed files... site/abundance info, stream power info, land cover info. Env. variables are in wide format.
@@ -580,7 +581,7 @@ dbhuc <- bind_cols(landdb_df, landhuc12_df)
 # Define candidate variables
 abundance <- obsabun$total_count #response variable
 DB_Pforest <- landdb_df$Dprc_frst # predictor variable (PV) 1
-SP_2yr <- SP_df$Sstrpwr_2yr  # PV 2
+SP_10yr <- SP_df$Sstrpwr_10yr  # PV 2
 HUC_Pforest <- landhuc12_df$Hprc_frst #PV 3
 HUC_Pth <- landhuc12_df$Hprc_TH # PV 4
 HUC_Pag <- landhuc12_df$Hprc_ag # PV 5
@@ -592,7 +593,7 @@ notil03 <- notil03 %>%
 
 mod1 <- lm(log(abundance + .01) ~ DB_Pforest)
 mod2 <- lm(log(abundance + .01) ~ DB_Pforest+ SP_2yr, notil03)
-mod3 <- lm(log(abundance + .01) ~ DB_Pforest + SP_2yr + HUC_Pth) # this is the final model!
+mod3 <- lm(log(abundance + .01) ~ DB_Pforest + SP_10yr + HUC_Pth) # this is the final model!
 
 mod4 <- lm(log(abundance + .01) ~ HUC_Pag)
 
@@ -619,10 +620,10 @@ ggplot() + geom_point(aes(DB_Pforest, abundance)) + scale_y_log10()
 ##############################################################################################################
 
 # create df that contains all candidate variables
-mydata <- as.tibble(cbind(abundance, DB_Pforest, SP_2yr, HUC_Pforest, HUC_Pth, HUC_Pag))
+mydata <- as.tibble(cbind(abundance, DB_Pforest, SP_10yr, HUC_Pforest, HUC_Pth, HUC_Pag))
 
 #step-wise regression
-fit <- lm(log(abundance + .01) ~ DB_Pforest + SP_2yr + HUC_Pforest + HUC_Pth + HUC_Pag, data = mydata)
+fit <- lm(log(abundance + .01) ~ DB_Pforest + SP_10yr + HUC_Pforest + HUC_Pth + HUC_Pag, data = mydata)
 step <- stepAIC(fit, direction = "both")
 step$anova  #display results
 
@@ -651,16 +652,39 @@ summary(fit3)
 
 ############################## Visualizations ############################################
 # create dataframe that includes variables in final model
-finalmodel <- as.tibble(cbind(abundance, DB_Pforest, SP_2yr,HUC_Pth))
+finalmodel <- as.tibble(cbind(abundance, DB_Pforest, SP_10yr,HUC_Pth))
 # create object for final model linear regression 
-lm_finalmodel <- lm(log(abundance + .01) ~ DB_Pforest + SP_2yr + HUC_Pth, data = finalmodel) 
+##lm_finalmodel <- lm(log(abundance + .01) ~ DB_Pforest + SP_2yr + HUC_Pth, data = finalmodel) 
 # save predictions of the model in the new data frame together with variable you want to plot against
-predicted_df <- data.frame(abun_pred = predict(lm_finalmodel, finalmodel), DBforest = finalmodel$DB_Pforest)
-
-#This is the predicted line of multiple regression
-ggplot(finalmodel, aes(x = DB_Pforest, y = log(abundance))) + geom_point() +
-  geom_line(color = 'red', data = predicted_df, aes(x = DBforest, y = abun_pred))
+##predicted_df <- data.frame(abun_pred = predict(lm_finalmodel, finalmodel), DBforest = finalmodel$DB_Pforest)
 
 
+# bring in SUMP df for abundance vs. river distance graph
+sump <- as.tibble(read.csv("SUMP.csv"), colnames = TRUE)
 
+##################### River Distance VS Abundance Plot ###########################################
+riverDistplot <- ggplot(SUMP, aes(SUMP$riv_dist_km, SUMP$total_count, color = clams)) + 
+  geom_point() +
+  geom_smooth(method='lm', formula= y~x, aes(group=1)) +
+  theme(axis.text.y = element_text(face = "bold")) +
+  xlab("River Distance (km)") + 
+  ylab("Mussel Abundance") + #ggtitle("Mussel Abundance & Invasive Asian Clam Presence \nat Sites on the South Umpqua River, OR") + 
+  scale_y_log10() 
 
+riverDistplot <- riverDistplot + labs(color = "Asian clams \npresent")
+
+##################### Model Variables VS Abundance Plot ###########################################
+DBforestPlot <- ggplot(finalmodel, aes(x = DB_Pforest, y = abundance)) + geom_point() +
+  geom_smooth(method='lm', formula= y~x, aes(group=1)) + scale_y_log10() +
+  xlab("Drainage Basin Percent Forest") + ylab("Mussel Abundance")
+
+SPPlot <- ggplot(finalmodel, aes(x = SP_10yr, y = abundance)) + geom_point() +
+  scale_y_log10() + xlab("10 Year Stream Power") + ylab("Mussel Abundance")
+
+THPlot <- ggplot(finalmodel, aes(x = HUC_Pth, y = abundance)) + geom_point() +
+  scale_y_log10() + xlab("HUC12 Percent Timber Harvest") + ylab("Mussel Abundance")
+
+ModelPlot <- plot_grid(riverDistplot, DBforestPlot, SPPlot, THPlot)
+
+save_plot("ModelPlot.jpeg", ModelPlot, ncol = 2, nrow = 2, base_height = 4,
+          base_width = 8)
