@@ -13,9 +13,9 @@ site_dist_area <- as.tibble(read_csv("SUMPpnts_distance_area.csv", col_names = T
 
 # Create new tibbles for each data set that only represent needed columns
 lauradata_sel <- lauradata %>%
-  select(obs_id, obs_type,water_body,usgs_gage,species_comm,total_count,area,Y,X,datum,obs_date)
+  dplyr::select(obs_id, obs_type,water_body,usgs_gage,species_comm,total_count,area,Y,X,datum,obs_date)
 nancydata_sel <- duncandata %>%
-  select(obs_id,obs_type,water_body,usgs_gage,species_comm,total_count,area,datum,Y,X,obs_date)
+  dplyr::select(obs_id,obs_type,water_body,usgs_gage,species_comm,total_count,area,datum,Y,X,obs_date)
 
 # Bind datasets together and create 2 different datasets for comparing densities of only visual observations VS visual + sampled beds combined
 laurancy <- bind_rows(lauradata_sel, nancydata_sel)
@@ -36,7 +36,7 @@ laurancy_distArea2 <- inner_join(laurancy_all, site_dist_area)
 #PROBLEM: NEED TO ASSIGN EACH OF NANCY'S POINTS TO THE NEAREST GAGE... NEED TO UPDATE SPREADSHEET ACCORDINGLY
 
 #Change usgs_gage in dataset from character to factor
-as_factor(laurancy_distArea$usgs_gage)
+as_factor(laurancy_distArea2$usgs_gage)
 as_factor(laurancy_distArea2$usgs_gage)
 
 # add column to specify whether asian clams present at site 
@@ -58,6 +58,9 @@ laurancy_distArea2[29, "clams"] <- "yes"
 SUMP <- laurancy_distArea2 %>%
   filter(water_body != "Cow Cr") %>%
   filter(obs_id != "MAFA_KBarRanch" & obs_id != "MAFA_WiegleRd" & obs_id != "MAFA_CoffeCr1" & obs_id != "MAFA_BoomerHill")
+
+#Export SUMP df to csv for use in ordination script
+write.csv(SUMP,"/Users/williamjohnson/Desktop/Laura/Hallett_Lab/Repositories/thesis-mussels/site_DATAexplore/SUMP.csv", row.names = FALSE)
 
 #Created different subset of data to focus only on which sites were at which distance to compare to graph
 SUMP2 <- SUMP %>%
@@ -85,14 +88,15 @@ ggplot(SUMP, aes(SUMP$riv_dist_km, log(SUMP$total_count), color = usgs_gage)) +
   ylab("log(Mussel Abundance)") + ggtitle("Mussel Abundance on the South Umpqua River, OR")
 
 # Abundance VS River Distance w/ Points colored by clams status
-ggplot(SUMP, aes(SUMP$riv_dist_km, SUMP$total_count, color = clams)) + 
+riverDistplot <- ggplot(SUMP, aes(SUMP$riv_dist_km, SUMP$total_count, color = clams)) + 
   geom_point() +
+  geom_smooth(method='lm', formula= y~x, aes(group=1)) +
   theme(axis.text.y = element_text(face = "bold")) +
   xlab("River Distance (km)") + 
   ylab("Mussel Abundance") + ggtitle("Mussel Abundance & Invasive Asian Clam Presence \nat Sites on the South Umpqua River, OR") + 
-  scale_y_log10()
+  scale_y_log10() 
 
-
+riverDistplot + labs(color = "Asian clams \npresent")
 
 
 ggplot(SUMP, aes(SUMP$riv_dist_km, log(SUMP$total_count))) +
