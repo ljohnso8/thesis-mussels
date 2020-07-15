@@ -52,7 +52,7 @@ row.names(SPLUdbhuc12) <- obsabun$obs_id
 # Have to specify dplyr::select for each command b/c of a clash with the 'select' function b/w dplyr and MASS libraries
 streampwr_2 <- streampwr %>% dplyr::select(av_SLPE_gradient, av_acw, Sstrpwr_2yr:Sstrpwr_5perc)
 landDB_2 <- landDB %>% dplyr::select(prc_frst:prc_TH)
-landhuc12_2 <- landhuc12 %>% dplyr::select(prc_frst:prc_TH)
+landhuc12_2 <- landhuc12 %>% dplyr::select(prc_frst:relativeTH)
 SPLUdb_2 <- SPLUdb %>% dplyr::select(av_SLPE_gradient, av_acw, Sstrpwr_2yr:prc_TH)
 SPLUhuc12_2 <- SPLUhuc12 %>% dplyr::select(av_SLPE_gradient, av_acw, Sstrpwr_2yr:prc_TH)
 SPLUdbhuc12_2 <- SPLUdbhuc12 %>% dplyr::select(av_SLPE_gradient, av_acw, Sstrpwr_2yr:HUC12prc_TH)
@@ -565,7 +565,7 @@ colnames(landhuc12) <- paste("H", colnames(landhuc12), sep = "")
 # create new df that has columns of env. variables (SP + ACW/ slope + DB & HUC12 LandUse)
 SP_df <- streampwr[, c(3,4,9:12)] #subset select variables from stream power dataset
 landdb_df <- landDB[,c(3:8)] #subset select variables from DB land use dataset
-landhuc12_df <- landhuc12[,c(4:9)] #subset select variables from HUC12 land use dataset
+landhuc12_df <- landhuc12[,c(4:10)] #subset select variables from HUC12 land use dataset
 
 #need a few env variable df's b/c combining them all in one results in illegible ggpairs graph
 spdb <- bind_cols(SP_df, landdb_df) 
@@ -585,6 +585,7 @@ SP_10yr <- SP_df$Sstrpwr_10yr  # PV 2
 HUC_Pforest <- landhuc12_df$Hprc_frst #PV 3
 HUC_Pth <- landhuc12_df$Hprc_TH # PV 4
 HUC_Pag <- landhuc12_df$Hprc_ag # PV 5
+HUC_Rth <- landhuc12_df$HrelativeTH
 
 notil03 <- as.tibble(cbind(abundance, DB_Pforest, SP_2yr, HUC_Pth))
 
@@ -592,14 +593,16 @@ notil03 <- notil03 %>%
   filter(!abundance == 86978)
 
 mod1 <- lm(log(abundance + .01) ~ DB_Pforest)
-mod2 <- lm(log(abundance + .01) ~ DB_Pforest+ SP_2yr, notil03)
-mod3 <- lm(log(abundance + .01) ~ DB_Pforest + SP_10yr + HUC_Pth) # this is the final model!
+mod2 <- lm(log(abundance + .01) ~ DB_Pforest+ SP_10yr)
+mod3 <- lm(log(abundance + .01) ~ DB_Pforest + SP_10yr + HUC_Pth) # this is the final model! (with OG huc TH variable)
 
-mod4 <- lm(log(abundance + .01) ~ HUC_Pag)
+mod4 <- lm(log(abundance + .01) ~ DB_Pforest + SP_10yr + HUC_Pag)
+
+
 
 anova(mod1, mod2) #mod 2 does not significantly explain more variation
 anova(mod2, mod3) #mod 3 does not sig. explain more variation than model 2
-anova(mod1, mod3)
+anova(mod2, mod4)
 
 #### Next step: Take a look at results of linear regressions (reference biostats HW)
 summary(mod1)
@@ -620,10 +623,12 @@ ggplot() + geom_point(aes(DB_Pforest, abundance)) + scale_y_log10()
 ##############################################################################################################
 
 # create df that contains all candidate variables
-mydata <- as.tibble(cbind(abundance, DB_Pforest, SP_10yr, HUC_Pforest, HUC_Pth, HUC_Pag))
+# 6/3: Updated HUC12 timber harvest variable so it was relativized by the amount of land available
+#      to harvest (percent forest + percent timber harvest)
+mydata <- as.tibble(cbind(abundance, DB_Pforest, SP_10yr, HUC_Pforest, HUC_Pag, HUC_Rth))
 
 #step-wise regression
-fit <- lm(log(abundance + .01) ~ DB_Pforest + SP_10yr + HUC_Pforest + HUC_Pth + HUC_Pag, data = mydata)
+fit <- lm(log(abundance + .01) ~ DB_Pforest + SP_10yr + HUC_Pforest + HUC_Rth + HUC_Pag, data = mydata)
 step <- stepAIC(fit, direction = "both")
 step$anova  #display results
 
