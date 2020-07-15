@@ -1,0 +1,51 @@
+GRP,Transect_Num,Quadrat_Num,Surface_Live,Surface_Dead,Excavated_Live,Excavated_Dead,Notes
+A,1,1,0,0,,,Transects 1 & 2 were in the deeper pool unit at the downstream end of bed
+A,1,2,2,0,,,Animals counted but not measured; inaccessible due to depth
+A,1,3,21,0,,,No excavation; inaccessible due to depth and current
+A,2,1,35,3,3,0,
+A,2,2,25,1,,,
+A,2,3,0,0,,,No surface count; inaccessible due to depth + current. End pool unit.
+A,3,1,12,3,1,0,Start of riffle unit. One mussel counted in surface count was inaccessible for measurement (deeply wedged under boulder).
+A,3,2,1,0,,,
+A,3,3,113,2,,,
+A,3,4,95,2,0,0,
+A,3,5,11,0,,,
+A,4,1,80,2,,,End 7-17-18 @ 16:12; 26.5 C
+A,4,2,43,3,0,0,Start 7-18-18 @ 9:00; 23 C
+A,4,3,10,5,,,
+A,4,4,0,0,,,No surface count; inaccessible due to depth + current
+A,4,5,3,2,,,
+A,5,1,59,0,0,0,
+A,5,2,27,0,,,
+A,5,3,36,1,,,
+A,5,4,77,1,1,0,
+A,5,5,17,0,,,end of riffle unit
+A,6,1,4,5,,,transect 6: stream habitat = pool is tailing out into riffle
+A,6,2,12,0,0,0,
+A,6,3,5,0,,,
+A,6,4,0,0,,,
+A,7,1,1,0,0,0,
+A,7,2,0,0,,,
+A,7,3,0,0,,,
+A,7,4,0,0,0,0,100% large boulders- not possible to move
+A,8,1,8,0,,,
+A,8,2,0,0,,,
+A,8,3,0,0,0,0,
+A,8,4,0,0,,,
+A,9,1,45,0,,,End 7-18-18
+A,9,2,0,0,3,0,Start 7-19-18 @ 8:30; 23 C
+A,9,3,0,0,,,
+A,9,4,0,0,,,
+A,10,1,68,5,1,0,
+A,10,2,55,6,,,
+A,10,3,23,0,,,
+A,10,4,0,0,0,0,
+A,10,5,0,0,,,
+A,11,1,16,0,,,
+A,11,2,54,2,,,Did not excavate to perserve silty substrate for mussels. Quad mostly boulder.
+A,11,3,41,1,1,0,
+A,11,4,18,0,,,
+A,11,5,3,1,,,
+A,11,6,0,0,0,0,
+A,12,1,80,1,,,
+A,12,2,41,0,,,End 7-19-18
