@@ -71,10 +71,17 @@ abunpwr %>%
 streampwr <- as.tibble(read.csv("stats_streamPWR.csv", header = TRUE))
 streampwr2 <- streampwr %>%
   mutate(abundance2 = log(abundance)) %>%
-  select(obs_id, site_id, abundance, Sstrpwr_10yr)
+  select(obs_id, site_id, abundance, abundance2, Sstrpwr_10yr) %>%
+  mutate(species = "M. falcata")
 
-ggplot(streampwr2, aes(species, Sstrpwr_10yr, color = abundance2)) + geom_boxplot(outlier.shape = NA) + 
-  geom_jitter(width = 0.2) + ylab("10 YR Specific Stream Power") + #theme_classic() + 
+boxplot <- ggplot(streampwr2, aes(species, Sstrpwr_10yr, color = abundance2)) + geom_boxplot(outlier.shape = NA) + 
+  geom_jitter(width = 0.2) + ylab("10 YR Specific Stream Power (watts/m^2)") + theme_classic() #+ 
   #scale_color_gradientn(name = "log(Mussel Abundance)" +
   #theme(legend.title = element_text(size=rel(1.15), hjust=0.5, face="bold"))
  
+mid <- mean(streampwr2$abundance2)
+boxplot + scale_color_gradient2(midpoint = mid, low = "red", mid = "blue", high = "green")
+
+boxplot + scale_color_gradientn(colours = rainbow(5))
+
+log(200)
