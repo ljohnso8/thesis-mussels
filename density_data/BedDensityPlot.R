@@ -15,10 +15,10 @@ count2 <- count %>%
 
 # Density plot of mussel lengths by bed
 density_plot <- ggplot(count2, aes(length, fill = bed_id, color = bed_id)) + geom_density(alpha = 0.1) + theme_classic()
-
+density_plot2 <- density_plot + geom_vline(xintercept = 3) + geom_vline(xintercept = 10)
 # Count plot of mussel lengths by bed
 count_plot <- ggplot(count2, aes(length, fill = bed_id, color = bed_id)) + geom_density(aes(y = stat(count)), alpha = 0.1) + theme_classic()
-
+count_plot2 <- count_plot + geom_vline(xintercept = 3)
 # Aggregate all BKY sites into one aggregated bed to see how this changes visualization of density plots
 count$bed_id <- as.character(count$bed_id) #Change bed_id variable to a character 
 count3 <- count %>% 
@@ -39,4 +39,8 @@ BedDensityPlot <- plot_grid(density_plot, count_plot, AGGdensity_plot, AGGcount_
 
 save_plot("BedDensityPlot.jpeg", BedDensityPlot, ncol = 2, nrow = 2, base_height = 4,
          base_width = 8)
+
+BedDensityPlot2 <- plot_grid(density_plot2, count_plot2)
+save_plot("BedDensityPlot2.jpeg", BedDensityPlot2, ncol = 1, nrow = 2, base_height = 2,
+          base_width = 8)
                                                                           
