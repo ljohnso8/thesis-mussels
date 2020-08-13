@@ -1,24 +1,29 @@
 setwd("/Users/williamjohnson/Desktop/Laura/Hallett_Lab/Repositories/thesis-mussels/density_data")
 library(tidyverse)
+library(cowplot)
 
 #read in csv of my and Nancy's data PLUS site distance/basin area file
 duncandata <- as.tibble(read_csv("LatLongduncandataV2.csv", col_names = TRUE)) %>%
   rename(obs_num = X1) %>%
-  rename(datum = Datum)
+  rename(datum = Datum) %>%
+  filter(obs_type != "shell")
 lauradata <- as.tibble(read_csv("SUMP_densitydata_2018.csv", col_names = TRUE)) %>%
   rename(Y = dec_lat) %>%
   rename(X = dec_long)
 site_dist_area <- as.tibble(read_csv("SUMPpnts_distance_area.csv", col_names = TRUE))
-
+summer2020 <- as.tibble(read_csv("SUMP_SUMMER2020_sel.csv", col_names = TRUE)) %>%
+  select(obs_id:Notes)
+laurancy <- as.tibble(read_csv("laurancy.csv", col_names = TRUE))
 
 # Create new tibbles for each data set that only represent needed columns
 lauradata_sel <- lauradata %>%
   dplyr::select(obs_id, obs_type,water_body,usgs_gage,species_comm,total_count,area,Y,X,datum,obs_date)
 nancydata_sel <- duncandata %>%
   dplyr::select(obs_id,obs_type,water_body,usgs_gage,species_comm,total_count,area,datum,Y,X,obs_date)
-
+summer2020_sel <- summer2020 %>%
+  dplyr::select(-Notes)
 # Bind datasets together and create 2 different datasets for comparing densities of only visual observations VS visual + sampled beds combined
-laurancy <- bind_rows(lauradata_sel, nancydata_sel)
+laurancy <- bind_rows(lauradata_sel, nancydata_sel, summer2020_sel)
 laurancy_vis <- laurancy %>%
   filter(obs_type == "visual")
 laurancy_all <- laurancy %>%
@@ -27,10 +32,25 @@ laurancy_all <- laurancy %>%
 # Write laurancy file to folders (4/8/2020: I wrote this file and then subsequently modified it to an updated format that 
 ##### is different than the one created below: I added site_id column)
 #write.table(laurancy, file = "laurancy.csv", sep = ",", col.names = TRUE)
-          
+        
+
+#Create dataset (NAMED LAURA_DATA2) that is only laura's observations from laurancy 
+laura_data <- laurancy[1:21,] 
+#Join laura_data and summer2020
+laura_data2 <- rbind(laura_data, summer2020_sel)
 
 #Join laurancy and distance_area datasets
 laurancy_distArea2 <- inner_join(laurancy_all, site_dist_area)
+
+#Nancy data select that includes distance column
+nancy_sel <- laurancy_distArea2[22:36,]
+
+#Laura data select that includes distance column
+laura_sel <- laurancy_distArea2[c(1:21,37:51),]
+
+
+
+
 
 #want to visualize abundance as a function of river km with individual points colored by the nearest gage
 #PROBLEM: NEED TO ASSIGN EACH OF NANCY'S POINTS TO THE NEAREST GAGE... NEED TO UPDATE SPREADSHEET ACCORDINGLY
@@ -97,6 +117,34 @@ riverDistplot <- ggplot(SUMP, aes(SUMP$riv_dist_km, SUMP$total_count, color = cl
   scale_y_log10() 
 
 riverDistplot + labs(color = "Asian clams \npresent")
+
+# Duncan Data Abundance VS River Distance
+nancyplot <- ggplot(nancy_sel, aes(nancy_sel$riv_dist_km, nancy_sel$total_count)) + 
+  geom_point() +
+  geom_smooth(method='lm', formula= y~x, aes(group=1)) +
+  scale_y_log10() + theme_classic() +
+  xlab("River Distance (km)") + 
+  ylab("Mussel Abundance") + ggtitle("Nancy Data Abundance VS Distance") 
+
+# Laura Data Abundance VS River Distance
+lauraplot <- ggplot(laura_sel, aes(laura_sel$riv_dist_km, laura_sel$total_count)) + 
+  geom_point() + 
+  geom_smooth(method='lm', formula= y~x, aes(group=1)) +
+  scale_y_log10() + theme_classic() +
+  xlab("River Distance (km)") + 
+  ylab("Mussel Abundance") + ggtitle("Laura Data Abundance VS Distance") 
+
+mod1 <- lm(log(laura_sel$total_count) ~ laura_sel$riv_dist_km)
+mod2 <- lm(log(nancy_sel$total_count) ~ nancy_sel$riv_dist_km) 
+
+summary(mod1)
+summary(mod2)
+
+
+plot_grid(nancyplot, lauraplot, cols = 1, rows = 2)
+    
+
+
 
 
 ggplot(SUMP, aes(SUMP$riv_dist_km, log(SUMP$total_count))) +
