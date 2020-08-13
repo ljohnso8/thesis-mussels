@@ -1,0 +1,22 @@
+obs_id,site_id,obs_type,water_body,usgs_gage,species_comm,total_count,area,Y,X,datum,obs_date,Notes,,,,,,,,,,,,,,,,,,
+DAYSCH01,DAYSCH,visual,S Umpqua,Tiller,"western pearlshell, floater",2,10,42.959717,-123.175829,NAD83,8/4/2020,1MAFA1ANO,,,,,,,,,,,,,,,,garmin GPSMAP 64s Software Version 470,,8/4/2020 12:00
+DAYSCH02,DAYSCH,visual,S Umpqua,Tiller,"western pearlshell, floater",1,NA,42.959589,-123.176136,NAD83,8/4/2020,1MAFA,,,,,,,,,,,,,,,,garmin GPSMAP 64s Software Version 470,,8/4/2020 12:43
+DAYSCH04UPEND,DAYSCH,timed search,S Umpqua,Tiller,"western pearlshell, floater, western ridged",1600,1600,42.959003,-123.17658,NAD83,8/4/2020,USENDOFMAFABED,,,,,,,,,,,,,,,,garmin GPSMAP 64s Software Version 470,,8/4/2020 13:14
+DAYSCH04DWN,DAYSCH,timed search,S Umpqua,Tiller,"western pearlshell, floater, western ridged",1600,1600,42.959513,-123.176441,NAD83,8/4/2020,DSENDOFBIGMAFABED+ANO+GOAN,,,,,,,,,,,,,,,,garmin GPSMAP 64s Software Version 470,,8/4/2020 13:30
+DAYSCH05UP,DAYSCH,timed search,S Umpqua,Tiller,"floater, western pearlshell",944,735,42.957005,-123.175153,NAD83,8/4/2020,HUGEANOBED,,,,,,,,,,,,,,,,garmin GPSMAP 64s Software Version 470,,8/4/2020 15:43
+DAYSCH06UP,DAYSCH,visual,S Umpqua,Tiller,"floater, western pearlshell",69,150,42.956996,-123.17594,NAD83,8/5/2020,UPENDANOBED,,,,,,,,,,,,,,,,garmin GPSMAP 64s Software Version 470,,8/5/2020 12:57
+DAYSCH06DWN,DAYSCH,visual,S Umpqua,Tiller,"floater, western pearlshell",69,150,42.957448,-123.176174,NAD83,8/5/2020,68 ANO 2MAFA,,,,,,,,,,,,,,,,garmin GPSMAP 64s Software Version 470,,8/5/2020 13:15
+DAYSCH05DWN,DAYSCH,timed search,S Umpqua,Tiller,"floater, western pearlshell",944,735,42.958526,-123.175899,NAD83,8/5/2020,DWN ANO BED,,,,,,,,,,,,,,,,garmin GPSMAP 64s Software Version 470,,8/5/2020 13:37
+DAYSCH03,DAYSCH,visual,S Umpqua,Tiller,western pearlshell,1,NA,42.959871,-123.176224,NAD83,8/5/2020,1 MAFA,,,,,,,,,,,,,,,,garmin GPSMAP 64s Software Version 470,,8/5/2020 14:49
+DAYSCH07,DAYSCH,visual,S Umpqua,Tiller,"western pearlshell, western ridged",8,0.5,42.958645,-123.176487,NAD83,8/5/2020,5 MAFA 1 GOAN,,,,,,,,,,,,,,,,garmin GPSMAP 64s Software Version 470,,8/5/2020 16:12
+DAYSCH08,DAYSCH,visual,S Umpqua,Tiller,western pearlshell,36,10,42.958858,-123.176606,NAD83,8/5/2020,MAFA AGG 36,,,,,,,,,,,,,,,,garmin GPSMAP 64s Software Version 470,,8/5/2020 16:14
+SR01DWN,SR,visual,S Umpqua,Tiller,"western pearlshell, floater",1348,1950,42.943679,-123.011171,NAD83,8/8/2020,DS END MAFA BED,,,,,,,,,,,,,,,,garmin GPSMAP 64s Software Version 470,,8/8/2020 12:57
+SR01UP,SR,visual,S Umpqua,Tiller,"western pearlshell, floater",1348,1950,42.943925,-123.010068,NAD83,8/8/2020,UP END BED 1347MAFA1ANO,,,,,,,,,,,,,,,,garmin GPSMAP 64s Software Version 470,,8/8/2020 16:44
+SR02,SR,visual,S Umpqua,Tiller,western pearlshell,50,120,42.944516,-123.009481,NAD83,8/8/2020,,,,,,,,,,,,,,,,,,,
+ZINCCMP01,ZINCCMP,visual,S Umpqua,Tiller,western pearlshell,200,15,43.042809,-122.786841,NAD83,8/8/2020,200 YOUNG MAFA,,,,,,,,,,,,,,,,,,
+ZINCCMP02US,ZINCCMP,visual,S Umpqua,Tiller,western pearlshell,2500,NA,43.04218,-122.786775,NAD83,8/8/2020,2500 MAFA UNDER CNT LOTS OF YOUNG BED LIKELY 1000  SQ M PLUS,,,,,,,,,,,,,,,,garmin GPSMAP 64s Software Version 470,,8/8/2020 19:33
+OB01,OB,visual,S Umpqua,Tiller,"western pearlshell, floater",2,3,42.937824,-122.993021,NAD83,8/9/2020,,,,,,,,,,,,,,,,,,,
+OB02DS,OB,timed search,S Umpqua,Tiller,western pearlshell,3114,115,42.937651,-122.992321,NAD83,8/9/2020,3114MAFADS,,,,,,,,,,,,,,,,garmin GPSMAP 64s Software Version 470,,8/9/2020 14:38
+OBO2US,OB,timed search,S Umpqua,Tiller,western pearlshell,3114,115,42.93748,-122.992219,NAD83,8/9/2020,UP END BED,,,,,,,,,,,,,,,,garmin GPSMAP 64s Software Version 470,,8/9/2020 14:41
+OB03,OB,visual,S Umpqua,Tiller,western pearlshell,350,25,42.937379,-122.992088,NAD83,8/9/2020,350 MAFA ,,,,,,,,,,,,,,,,garmin GPSMAP 64s Software Version 470,,8/9/2020 14:47
+OB04,OB,visual,S Umpqua,Tiller,floater,5,10,42.936623,-122.991829,NAD83,8/9/2020,,,,,,,,,,,,,,,,,,,
