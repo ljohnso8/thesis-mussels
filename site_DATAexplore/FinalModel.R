@@ -2,6 +2,8 @@ setwd("/Users/williamjohnson/Desktop/Laura/Hallett_Lab/Repositories/thesis-musse
 
 library(tidyverse)
 library(MASS)
+library(scales)
+library(cowplot)
 #Bring in needed files...
 
 #finalmodel spreadsheet has all candidate variables
@@ -14,10 +16,10 @@ step <- stepAIC(fit, direction = "both")
 step$anova  #display results
 
 #Look at Model
-mod1 <- lm(log(finalmodel$total_count + .01) ~ finalmodel$DP_Pforest+ finalmodel$HUC_Pag)
+mod1 <- lm(log(finalmodel$total_count + .01) ~ finalmodel$DB_Pforest+ finalmodel$HUC_Pag)
 summary(mod1)
 
-modA <- lm(log(finalmodel$total_count + .01) ~ finalmodel$DP_Pforest)
+modA <- lm(log(finalmodel$total_count + .01) ~ finalmodel$DB_Pforest)
 summary(modA)
 
 modB <- lm(log(finalmodel$total_count + .01) ~ finalmodel$SP_10yr)
@@ -39,8 +41,34 @@ riverDistplot <- ggplot(finalmodel_SUMP, aes(finalmodel_SUMP$dist_km, finalmodel
   geom_point() +
   geom_smooth(method='lm', formula= y~x, aes(group=1)) +
   theme(axis.text.y = element_text(face = "bold")) +
-  xlab("River Distance (km)") + 
+  xlab("River Distance (km)") +  
   ylab("Mussel Abundance") + #ggtitle("Mussel Abundance & Invasive Asian Clam Presence \nat Sites on the South Umpqua River, OR") + 
-  scale_y_log10() 
+  scale_y_log10(breaks = trans_breaks("log10", function(x) 10^x), 
+                labels = trans_format("log10", math_format(10^.x))) +
+  theme_bw()
 
-riverDistplot <- riverDistplot + labs(color = "Asian clams \npresent")
+riverDistplot <- riverDistplot + labs(color = "Asian clams \npresent") 
+
+##################### Model Variables VS Abundance Plot ###########################################
+DBforestPlot <- ggplot(finalmodel, aes(x = DB_Pforest, y = total_count)) + geom_point() +
+  geom_smooth(method='lm', formula= y~x, aes(group=1)) + 
+  xlab("Drainage Basin Percent Forest") + ylab("Mussel Abundance") +
+  scale_y_log10(breaks = trans_breaks("log10", function(x) 10^x), 
+                labels = trans_format("log10", math_format(10^.x))) +
+  theme_bw()
+
+HUCagPlot <- ggplot(finalmodel, aes(x = HUC_Pag, y = total_count)) + geom_point() +
+  xlab("HUC12 Percent Agriculture") + 
+  scale_y_log10(breaks = trans_breaks("log10", function(x) 10^x), 
+                labels = trans_format("log10", math_format(10^.x))) +
+  theme_bw()
+
+HUCagPlot <- HUCagPlot + theme(axis.title.y = element_blank(), axis.text.y = element_blank())
+
+
+
+
+ModelPlot <- plot_grid(DBforestPlot, HUCagPlot)
+
+save_plot("ModelPlot.jpeg", ModelPlot, ncol = 2, nrow = 1, base_height = 4,
+          base_width = 6)
