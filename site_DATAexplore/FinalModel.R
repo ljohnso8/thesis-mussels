@@ -13,35 +13,45 @@ finalmodel_nozinc <- finalmodel%>%
   filter(!site_id == "ZINCCMP")
   
 
-# Stepwise Regression
-fit <- lm(log(finalmodel$total_count + .01) ~ finalmodel$DP_Pforest + finalmodel$SP_10yr + 
-            finalmodel$HUC_Pforest + finalmodel$HUC_Pth + finalmodel$HUC_Pag, data = mydata)
+# Stepwise Regression using all Laura sites from 2018 & 2020
+fit <- lm(log(finalmodel$total_count + .01) ~ finalmodel$DB_Pforest + finalmodel$SP_10yr + 
+            finalmodel$HUC_Pforest + finalmodel$HUC_Pth + finalmodel$HUC_Pag)
 step <- stepAIC(fit, direction = "both")
 step$anova  #display results
-
+# Stepwise Regression using all sites EXCEPT Zinc Cr
 fit2 <- lm(log(finalmodel_nozinc$total_count + .01) ~ finalmodel_nozinc$DB_Pforest + finalmodel_nozinc$SP_10yr + 
             finalmodel_nozinc$HUC_Pforest + finalmodel_nozinc$HUC_Pth + finalmodel_nozinc$HUC_Pag)
 step <- stepAIC(fit2, direction = "both")
 step$anova  #display results
 
-#Look at Model
-nozinc <- lm(log(finalmodel_nozinc$total_count + .01) ~ finalmodel_nozinc$DB_Pforest+ finalmodel_nozinc$SP_10yr + finalmodel_nozinc$HUC_Pth)
-summary(nozinc)
+#Look at Summaries of Models
 
+#Stepwise Regression Model with all sites
 mod1 <- lm(log(finalmodel$total_count + .01) ~ finalmodel$DB_Pforest+ finalmodel$HUC_Pag)
 summary(mod1)
-
+#Stepwise Regression Model EXCEPT Zinc Cr
+nozinc <- lm(log(finalmodel_nozinc$total_count + .01) ~ finalmodel_nozinc$DB_Pforest+ finalmodel_nozinc$SP_10yr + finalmodel_nozinc$HUC_Pth)
+summary(nozinc)
+#Model that only includes Drainage Basin % Forest
 modA <- lm(log(finalmodel$total_count + .01) ~ finalmodel$DB_Pforest)
 summary(modA)
-
+#Model looking at significance of stream power
 modB <- lm(log(finalmodel$total_count + .01) ~ finalmodel$SP_10yr)
 summary(modB)
 
+#Look at anova results/ Model Comparisons
 anova(modA, mod1) #Results: Step-wise regression indicates DB_Pforest and HUC_Pag as contributing to 
 #the most explanation of variance in the data. Anova comparing simpler model (only including DB_Pforest)
 #to expanded model is borderline significant in support of more complex model. Keeping HUC_Pag variable
 #explains about 4% more variation in the data. Stream power performs very poorly. 
 
+anova(nozinc, modA) #Results: If I am reading this correctly, adding the HUC_Pth variable does significantly reduce
+#the residuals but the SP_10YR does not
+
+#What about a model with only DB_Pforest and HUC_Pth?
+modC <- lm(log(finalmodel_nozinc$total_count + .01) ~ finalmodel_nozinc$DB_Pforest+ finalmodel_nozinc$HUC_Pth)
+summary(modC)
+anova(nozinc, modC)
 # Only look at South Umpqua sites and regress abundance vs river distance
 finalmodel_SUMP <- finalmodel[1:46, ]
 
