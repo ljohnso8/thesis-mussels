@@ -49,6 +49,43 @@ riverDistplot <- ggplot(finalmodel_SUMP, aes(finalmodel_SUMP$dist_km, finalmodel
 
 riverDistplot <- riverDistplot + labs(color = "Asian clams \npresent") 
 
+##################### Drainage Basin Area VS Abundance Plot ###########################################
+
+drainmodel <- lm(log(drainmodel$total_count + .01) ~ drainmodel$drain_area)
+summary(drainmodel)
+
+
+#Bring in site distance / drainage basin data
+distarea <- as.tibble(read.csv("dist_area_final.csv"), colnames = TRUE)
+# Need to link drainage basin areas with site id
+
+distarea_SUMP <- distarea[1:46,]
+
+drainmodel <- finalmodel %>%
+  inner_join(distarea, by = "obs_id")
+
+Drainplot <- ggplot(drainmodel, aes(drain_area, total_count, color = clams)) + 
+  geom_point() +
+  geom_smooth(method='lm', formula= y~x, aes(group=1)) +
+  theme(axis.text.y = element_text(face = "bold")) +
+  xlab("Drainage Area (mi^2))") +  
+  ylab("Mussel Abundance") + #ggtitle("Mussel Abundance & Invasive Asian Clam Presence \nat Sites on the South Umpqua River, OR") + 
+  scale_y_log10(breaks = trans_breaks("log10", function(x) 10^x), 
+                labels = trans_format("log10", math_format(10^.x))) +
+  theme_bw()
+
+Drainplot <- Drainplot + labs(color = "Asian clams \npresent") 
+
+
+##################### Relationship B/W River Dist & Drain Area ##################################
+# Looks like drainage area and river distance highly correlated in the S. Umpqua
+ggplot(distarea_SUMP, aes(x = riv_dist_mi, y = drain_area)) + geom_point() + 
+  geom_smooth(method='lm', formula= y~x, aes(group=1)) + labs(title = "Distance vs Drainage Area for S. Umpqua Mussel Sites") +
+  xlab("River Distance (miles)") + ylab("Drainage Area (square miles)")
+
+#correlation test
+cor(distarea_SUMP$drain_area, distarea_SUMP$riv_dist_mi)
+
 ##################### Model Variables VS Abundance Plot ###########################################
 DBforestPlot <- ggplot(finalmodel, aes(x = DB_Pforest, y = total_count)) + geom_point() +
   geom_smooth(method='lm', formula= y~x, aes(group=1)) + 
@@ -72,3 +109,57 @@ ModelPlot <- plot_grid(DBforestPlot, HUCagPlot)
 
 save_plot("ModelPlot.jpeg", ModelPlot, ncol = 2, nrow = 1, base_height = 4,
           base_width = 6)
+
+#################################  Stream Power Figure ############################################
+
+#Bring in larger spreadsheet with species information
+
+allobs <- as.tibble(read.csv("Laura_AllObs_Abundance.csv"), colnames = TRUE)
+allobs <- allobs %>%
+  dplyr::select(obs_id:AsianClams)
+
+# Join allobs and finalmodel datasets
+
+finalmodel2 <- finalmodel %>%
+  dplyr::select(-site_id, -total_count, -DB_Pforest, -HUC_Pforest, -HUC_Pth, -HUC_Pag) %>%
+  inner_join(allobs, by = "obs_id")
+
+pearlshell <- finalmodel2 %>%
+  filter(Mafa_cnt >= 1) %>%
+  mutate(species = c("western pearlshell"))
+
+floater <- finalmodel2 %>%
+  filter(Ano_cnt >= 1) %>%
+  mutate(species = c("floater"))
+
+floater2 <- finalmodel2 %>%
+  filter(Ano_cnt > 5) %>%
+  mutate(species = c("floater bed"))
+
+ridged <- finalmodel2 %>%
+  filter(Goan_cnt >= 1) %>%
+  mutate(species = c("western ridged"))
+
+allspecies <- rbind(pearlshell, floater, ridged)
+
+boxplot <- ggplot(allspecies, aes(species, SP_10yr, color = total_count)) + geom_boxplot(outlier.shape = NA) + 
+  geom_jitter(width = 0.2) + ylab("10 YR Specific Stream Power (watts/m^2)") + theme_classic() #+ 
+#scale_color_gradientn(name = "log(Mussel Abundance)" +
+#theme(legend.title = element_text(size=rel(1.15), hjust=0.5, face="bold"))
+
+mid <- mean(allspecies$total_count)
+boxplot <- boxplot + scale_color_gradient2(midpoint = mid, low = "red", mid = "blue", high = "green")
+
+
+###################### Stream Power as Bivariate Plot #######################################
+
+# This one is pretty good!
+ggplot(allspecies, aes(x = SP_10yr, y = total_count, color = species)) + geom_point() +
+  geom_smooth(method='lm', formula= y~x, aes(group=1), se = FALSE) + 
+  xlab("10 Year Specific Stream Power") + ylab("Mussel Abundance") +
+  scale_y_log10(breaks = trans_breaks("log10", function(x) 10^x), 
+                labels = trans_format("log10", math_format(10^.x))) +
+  theme_bw()
+
+
+
