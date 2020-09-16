@@ -8,6 +8,10 @@ library(cowplot)
 
 #finalmodel spreadsheet has all candidate variables
 finalmodel <- as.tibble(read.csv("FinalModel.csv"), colnames = TRUE)
+#model w/o zinc cr
+finalmodel_nozinc <- finalmodel%>%
+  filter(!site_id == "ZINCCMP")
+  
 
 # Stepwise Regression
 fit <- lm(log(finalmodel$total_count + .01) ~ finalmodel$DP_Pforest + finalmodel$SP_10yr + 
@@ -15,7 +19,15 @@ fit <- lm(log(finalmodel$total_count + .01) ~ finalmodel$DP_Pforest + finalmodel
 step <- stepAIC(fit, direction = "both")
 step$anova  #display results
 
+fit2 <- lm(log(finalmodel_nozinc$total_count + .01) ~ finalmodel_nozinc$DB_Pforest + finalmodel_nozinc$SP_10yr + 
+            finalmodel_nozinc$HUC_Pforest + finalmodel_nozinc$HUC_Pth + finalmodel_nozinc$HUC_Pag)
+step <- stepAIC(fit2, direction = "both")
+step$anova  #display results
+
 #Look at Model
+nozinc <- lm(log(finalmodel_nozinc$total_count + .01) ~ finalmodel_nozinc$DB_Pforest+ finalmodel_nozinc$SP_10yr + finalmodel_nozinc$HUC_Pth)
+summary(nozinc)
+
 mod1 <- lm(log(finalmodel$total_count + .01) ~ finalmodel$DB_Pforest+ finalmodel$HUC_Pag)
 summary(mod1)
 
