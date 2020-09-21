@@ -1,0 +1,231 @@
+---
+title: "Assumptions for OLS"
+author: "Laura Johnson"
+date: "9/21/2020"
+output:
+  pdf_document: default
+  html_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(ECHO = TRUE)
+```
+
+## Final Model: Mussel Abundance VS Drainage Basin Area
+
+```{r basin area linear regression, ECHO = TRUE}
+# Set working directory and bring in libraries
+setwd("/Users/williamjohnson/Desktop/Laura/Hallett_Lab/Repositories/thesis-mussels/site_DATAexplore")
+library(tidyverse)
+library(MASS)
+
+#Bring in needed files:
+finalmodel <- as.tibble(read.csv("FinalModel.csv"), colnames = TRUE) #finalmodel spreadsheet has all candidate variables
+#model w/o zinc cr
+finalmodel <- finalmodel%>%
+  filter(!site_id == "ZINCCMP") 
+
+#Bring in site distance / drainage basin data
+distarea <- as.tibble(read.csv("dist_area_final.csv"), colnames = TRUE)
+# Need to link drainage basin areas with site id
+drainmodel <- finalmodel %>%
+  inner_join(distarea, by = "obs_id")
+
+#Simple linear regression predicting mussel abundance by drainage basin area of aggregation 
+drain_model <- lm(log(drainmodel$total_count + .01) ~ drainmodel$drain_area)
+summary(drain_model)
+
+```
+## Assess Assumptions of Normality for use of OLS Regression for Abundance ~ Drainage Basin Area 
+
+```{r basin area assumption tests, ECHO = TRUE}
+
+#Assumption of linearity 
+ggplot(drainmodel) + geom_point(aes(x = drainmodel$drain_area, y = log(drainmodel$total_count)))
+
+#Examine histogram of the residual values to determine if they are normally distributed
+ggplot(drain_model) + geom_histogram(aes(drain_model$residuals)) + labs(x = "Residual Values", y = "Count") +
+  ggtitle("Distribution of Residuals from Log(abundance) ~ Drainage Basin Area Regression")
+
+# Determine mean of residual values
+print(mean(drain_model$residuals)) # YES the mean of residuals = 0!!! 
+
+# Assess whether residuals meet assumption of homoscedasticity
+drain_model.res <- resid(drain_model)
+plot(drainmodel$drain_area, drain_model.res)
+abline(0,0) #Looks like greater variance at lower drainage basin areas than larger drainage basin areas... this is also
+             # the sites where there were lots of low abundance aggregations but also high abundances, too! All of the 
+            # abundances in the larger drainage basin area sites were much more similar to each other (less range b/w
+            # aggregation abundance)
+
+# Residual Plot
+ggplot(drain_model) + geom_point(aes(x = drain_model$fitted.values, y = drain_model$residuals)) + 
+  labs(x = "Predicted log(Mussel Abundance) Values", y = "Residual Values") + ggtitle("Abundance ~ Drainage Basin Area Residual Plot") 
+
+```
+## Results:
+
+### 1. Assumption of linearity: 
+  
+  Generally met, although it would be helpful to increase the sample size of sites with drainage basins b/w 750 - 1200 square miles... This is unfortunately not possible at this point!
+  
+### 2. Assumption of Zero Mean of Residuals: 
+  
+  MET!!!
+  
+### 3. Assumption of normality of residual error: 
+  
+  Not met- distribution does not look normal to me
+  
+### 4. Assumption of homoscedasticity: 
+  
+  Not met... there is greater variance of residual error as basin area size decreases. This is also where there was a large range in abundances of aggregations... lots of aggregations with low numbers, but also dense beds.
+  
+
+## Final Model: Abundance ~ Land Use & Stream Power
+
+Stepwise regression was used to determine final model, which includes Drainage Basin % Forest, 10-year specific stream power, and the % timber harvest within the HUC12 as independent explanatory variables
+
+```{r land use linear regression, echo = TRUE}
+mod1 <- lm(log(finalmodel$total_count + .01) ~ finalmodel$DB_Pforest + finalmodel$SP_10yr + finalmodel$HUC_Pth)
+summary(mod1)
+```
+## Assess Assumptions of Normality for use of OLS Regression for Abundance ~ Land Use/ Stream Power Variables
+
+```{r land use assumption tests, echo = TRUE}
+#Assumption of linearity
+ggplot(finalmodel) + geom_point(aes(x = DB_Pforest, y = log(total_count))) #Yes
+ggplot(finalmodel) + geom_point(aes(x = SP_10yr, y = log(total_count))) #Not much linearity here!!!
+ggplot(finalmodel) + geom_point(aes(x = HUC_Pth, y = log(total_count))) #Hard to tell b/c of low sample size
+
+
+#Examine histogram of the residual values to determine if they are normally distributed
+ggplot(mod1) + geom_histogram(aes(mod1$residuals)) + labs(x = "Residual Values", y = "Count") +
+  ggtitle("Distribution of Residuals from Log(abundance) ~ Final Model")
+
+# Determine mean of residual values
+print(mean(mod1$residuals)) # YES the mean of residuals = 0!!! 
+
+# Assumption of homoscedasticity of residuals
+mod1.res <- resid(mod1)
+plot(finalmodel$DB_Pforest, mod1.res) #No... greater variance at higher % forest
+
+plot(finalmodel$SP_10yr, mod1.res) # Ok... still unequal vertical variance but better horizontal variance
+
+plot(finalmodel$HUC_Pth, mod1.res) # Less variance of errors at low percent of timber harvest in the HUC
+
+```
+## Results:
+
+### 1. Assumption of linearity: 
+  
+  Generally met for the drainage basin % forest variable. Seems not met for the stream power variable, but mostly because there doesn't appear to be any relationship. The linear relationship between mussel abundance and HUC12 timber harvest is unclear due to low sample size (not enough sites in enough HUC12 units)
+  
+### 2. Assumption of Zero Mean of Residuals: 
+  
+  MET!!!
+  
+### 3. Assumption of normality of residual error: 
+  
+  MET!!! The distribution of residual error appears normally distributed.
+  
+### 4. Assumption of homoscedasticity: 
+  
+  Not met... there is greater variance of residual error as the percent of forest in the drainage basin increases. There is greater variance of residual error as the percent of timber harvest in the HUC12 unit increases. 
+  
+#My Thoughts: It is interesting that variance of residuals increases with decreasing drainage basin (DB) size and increasing DB % forest cover and HUC12 % timber harvest.... this corresponds with areas where the range of mussel abundances in aggregations was much greater. 
+
+##Potential Solution #1: Remove outliers
+
+Not sure that mussel aggregations of only 1 mussel are ecologically relevant. These isolated mussels are likely linked to different processes than what is structuring larger aggregations of mussels. Try removing all aggregations of only 1 mussel.
+
+```{r remove outliers, echo = TRUE}
+#filter to only consider aggregations with greater than 1 mussel
+finalmodel2 <- finalmodel%>%
+  filter(!site_id == "ZINCCMP") %>%
+  filter(total_count > 1)  
+
+drainmodel2 <- finalmodel2 %>%
+  inner_join(distarea, by = "obs_id")
+
+
+```
+
+## Repeat prior steps for Mussel Abundance ~ Drainage Basin and Assess any Differences
+
+```{r drainage basin area take 2, echo = TRUE}
+
+#Simple linear regression predicting mussel abundance by drainage basin area of aggregation 
+drain_model2 <- lm(log(drainmodel2$total_count + .01) ~ drainmodel2$drain_area)
+summary(drain_model2)
+
+#Assumption of linearity 
+ggplot(drainmodel2) + geom_point(aes(x = drainmodel2$drain_area, y = log(drainmodel2$total_count)))
+
+#Examine histogram of the residual values to determine if they are normally distributed
+ggplot(drain_model2) + geom_histogram(aes(drain_model2$residuals)) + labs(x = "Residual Values", y = "Count") +
+  ggtitle("Distribution of Residuals from Log(abundance) ~ Drainage Basin Area Regression")
+
+# Determine mean of residual values
+print(mean(drain_model2$residuals)) # YES the mean of residuals = 0!!! 
+
+# Assess whether residuals meet assumption of homoscedasticity
+drain_model2.res <- resid(drain_model2)
+plot(drainmodel2$drain_area, drain_model2.res) #Looks like greater variance at lower drainage basin areas than larger  drainage basin areas... this is also the sites where there were lots of low abundance aggregations but also high abundances, too! All of the  abundances in the larger drainage basin area sites were much more similar to each other (less range b/w aggregation abundance)
+
+# Residual Plot
+ggplot(drain_model2) + geom_point(aes(x = drain_model2$fitted.values, y = drain_model2$residuals)) + 
+  labs(x = "Predicted log(Mussel Abundance) Values", y = "Residual Values") + ggtitle("Abundance ~ Drainage Basin Area Residual Plot") 
+
+```
+## Differences:
+
+
+## Repeat prior steps for Mussel Abundance ~ Land Use/Stream Power and Assess any Differences
+```{r land use take 2, echo = TRUE}
+mod2 <- lm(log(finalmodel2$total_count + .01) ~ finalmodel2$DB_Pforest + finalmodel2$SP_10yr + finalmodel2$HUC_Pth)
+summary(mod2)
+
+#Assumption of linearity
+ggplot(finalmodel2) + geom_point(aes(x = DB_Pforest, y = log(total_count))) #Yes
+ggplot(finalmodel2) + geom_point(aes(x = SP_10yr, y = log(total_count))) #Not much linearity here!!!
+ggplot(finalmodel2) + geom_point(aes(x = HUC_Pth, y = log(total_count))) #Hard to tell b/c of low sample size
+
+
+#Examine histogram of the residual values to determine if they are normally distributed
+ggplot(mod2) + geom_histogram(aes(mod2$residuals)) + labs(x = "Residual Values", y = "Count") +
+  ggtitle("Distribution of Residuals from Log(abundance) ~ Final Model")
+
+# Determine mean of residual values
+print(mean(mod2$residuals)) # YES the mean of residuals = 0!!! 
+
+# Assumption of homoscedasticity of residuals
+mod2.res <- resid(mod2)
+plot(finalmodel2$DB_Pforest, mod2.res) #No... greater variance at higher % forest
+plot(finalmodel2$SP_10yr, mod2.res) # Ok... still unequal vertical variance but better horizontal variance
+plot(finalmodel2$HUC_Pth, mod2.res) # Less variance of errors at low percent of timber harvest in the HUC
+
+```
+
+## Results: 
+
+
+### Abundance ~ Basin Area:
+
+
+Removing aggregations of only 1 mussel from dataset resulted in a more normal distribution of residual error values and a better vertical homoscedastic balance of residual errors but DID NOT fix the horizontal heteroscedasticity of the residiual errors. Removing aggregations of 1 mussel also resulted in slightly different variable coefficients in the model, marginally increased standard error for model coefficients, but reduced the residual standard error of the model as a whole. The model as a whole had a increased R^2 value, increased F statistic value, and decreased p-value.
+
+
+### Abundance ~ Land Use/ Stream Power
+
+
+Removing aggregations of only 1 mussel drom the dataset resulted in slightly better vertical homoscedastic balance in the residual errors (lower bound of y axis went from -4 to -2), but did not do much for the horizontal heteroscedasticity problem. Removing aggregations of 1 mussel also resulted in slightly different variable coefficients in the model, marginally increased standard error for model coefficients, but reduced the residual standard error of the model as a whole. The model as a whole had a increased R^2 value, decreased F statistic value, and increased p-value (although model was still significant).
+
+
+
+
+
+
+
+  
+  
