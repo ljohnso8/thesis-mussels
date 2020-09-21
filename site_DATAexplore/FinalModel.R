@@ -4,12 +4,13 @@ library(tidyverse)
 library(MASS)
 library(scales)
 library(cowplot)
+library(nlme)
 #Bring in needed files...
 
 #finalmodel spreadsheet has all candidate variables
 finalmodel <- as.tibble(read.csv("FinalModel.csv"), colnames = TRUE)
 #model w/o zinc cr
-finalmodel_nozinc <- finalmodel%>%
+finalmodel <- finalmodel%>%
   filter(!site_id == "ZINCCMP")
   
 
@@ -18,20 +19,25 @@ fit <- lm(log(finalmodel$total_count + .01) ~ finalmodel$DB_Pforest + finalmodel
             finalmodel$HUC_Pforest + finalmodel$HUC_Pth + finalmodel$HUC_Pag)
 step <- stepAIC(fit, direction = "both")
 step$anova  #display results
-# Stepwise Regression using all sites EXCEPT Zinc Cr
-fit2 <- lm(log(finalmodel_nozinc$total_count + .01) ~ finalmodel_nozinc$DB_Pforest + finalmodel_nozinc$SP_10yr + 
-            finalmodel_nozinc$HUC_Pforest + finalmodel_nozinc$HUC_Pth + finalmodel_nozinc$HUC_Pag)
-step <- stepAIC(fit2, direction = "both")
-step$anova  #display results
 
 #Look at Summaries of Models
 
 #Stepwise Regression Model with all sites
-mod1 <- lm(log(finalmodel$total_count + .01) ~ finalmodel$DB_Pforest+ finalmodel$HUC_Pag)
+mod1 <- lm(log(finalmodel$total_count + .01) ~ finalmodel$DB_Pforest + finalmodel$SP_10yr + finalmodel$HUC_Pth)
 summary(mod1)
-#Stepwise Regression Model EXCEPT Zinc Cr
-nozinc <- lm(log(finalmodel_nozinc$total_count + .01) ~ finalmodel_nozinc$DB_Pforest+ finalmodel_nozinc$SP_10yr + finalmodel_nozinc$HUC_Pth)
-summary(nozinc)
+mod1.res <- resid(mod1)
+plot(finalmodel$DB_Pforest, drain_model.res)
+abline(0,0)
+plot(finalmodel$SP_10yr, drain_model.res)
+abline(0,0)
+plot(finalmodel$HUC_Pth, drain_model.res)
+abline(0,0)
+
+
+
+
+
+
 #Model that only includes Drainage Basin % Forest
 modA <- lm(log(finalmodel$total_count + .01) ~ finalmodel$DB_Pforest)
 summary(modA)
@@ -46,18 +52,28 @@ anova(modA, mod1) #Results: Step-wise regression indicates DB_Pforest and HUC_Pa
 #explains about 4% more variation in the data. Stream power performs very poorly. 
 
 anova(nozinc, modA) #Results: If I am reading this correctly, adding the HUC_Pth variable does significantly reduce
-#the residuals but the SP_10YR does not
+#the residuals but including the SP_10YR does not
 
 #What about a model with only DB_Pforest and HUC_Pth?
-modC <- lm(log(finalmodel_nozinc$total_count + .01) ~ finalmodel_nozinc$DB_Pforest+ finalmodel_nozinc$HUC_Pth)
+modC <- lm(log(finalmodel_nozinc$total_count + .01) ~ finalmodel_nozinc$HUC_Pth)
 summary(modC)
 anova(nozinc, modC)
+
+modD <- lm(log(finalmodel_nozinc$total_count + .01) ~ finalmodel_nozinc$DB_Pforest + finalmodel_nozinc$HUC_Pth)
+summary(modD)
+
+
+
+
+
 # Only look at South Umpqua sites and regress abundance vs river distance
-finalmodel_SUMP <- finalmodel[1:46, ]
+finalmodel_SUMP <- finalmodel[1:44, ]
 
 distmodel <- lm(log(finalmodel_SUMP$total_count + .01) ~ finalmodel_SUMP$dist_km)
-summary(distmodel)  
-
+summary(distmodel) 
+distmodel.res <- resid(distmodel)
+plot(finalmodel_SUMP$dist_km, distmodel.res)
+abline(0,0)
 ##################### River Distance VS Abundance Plot ###########################################
 riverDistplot <- ggplot(finalmodel_SUMP, aes(finalmodel_SUMP$dist_km, finalmodel_SUMP$total_count, color = clams)) + 
   geom_point() +
@@ -72,9 +88,19 @@ riverDistplot <- ggplot(finalmodel_SUMP, aes(finalmodel_SUMP$dist_km, finalmodel
 riverDistplot <- riverDistplot + labs(color = "Asian clams \npresent") 
 
 ##################### Drainage Basin Area VS Abundance Plot ###########################################
+drainmodel <- finalmodel %>%
+  inner_join(distarea, by = "obs_id")
 
-drainmodel <- lm(log(drainmodel$total_count + .01) ~ drainmodel$drain_area)
-summary(drainmodel)
+
+drain_model <- lm(log(drainmodel$total_count + .01) ~ drainmodel$drain_area)
+summary(drain_model)
+drain_model.res <- resid(drain_model)
+plot(drainmodel$drain_area, drain_model.res)
+abline(0,0)
+
+#Try fitting model with Generalized Least Squares
+drain_model.gls <- lm.gls(log(drainmodel$total_count + .01) ~ drainmodel$drain_area, weights(drainmodel$drain_area)
+summary(drain_model.gls)
 
 
 #Bring in site distance / drainage basin data
@@ -83,8 +109,7 @@ distarea <- as.tibble(read.csv("dist_area_final.csv"), colnames = TRUE)
 
 distarea_SUMP <- distarea[1:46,]
 
-drainmodel <- finalmodel %>%
-  inner_join(distarea, by = "obs_id")
+
 
 Drainplot <- ggplot(drainmodel, aes(drain_area, total_count, color = clams)) + 
   geom_point() +
