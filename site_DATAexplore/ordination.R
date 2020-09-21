@@ -565,16 +565,17 @@ colnames(landhuc12) <- paste("H", colnames(landhuc12), sep = "")
 # create new df that has columns of env. variables (SP + ACW/ slope + DB & HUC12 LandUse)
 SP_df <- streampwr[, c(3,4,9:12)] #subset select variables from stream power dataset
 landdb_df <- landDB[,c(3:8)] #subset select variables from DB land use dataset
-landhuc12_df <- landhuc12[,c(4:10)] #subset select variables from HUC12 land use dataset
+landhuc12_df <- landhuc12[,c(4:10)] %>%   #subset select variables from HUC12 land use dataset
+  rename(Hfrst = Hprc_frst, Hopn = Hprc_OPN, Hdvlp = Hprc_dvlp, Htdvlp = Hprc_Tdvlp, Hag = Hprc_ag, Hth = Hprc_TH, Hrth = HrelativeTH)
 
 #need a few env variable df's b/c combining them all in one results in illegible ggpairs graph
 spdb <- bind_cols(SP_df, landdb_df) 
 sphuc <- bind_cols(SP_df, landhuc12_df)
 dbhuc <- bind_cols(landdb_df, landhuc12_df)
 #correclation analysis
-#ggpairs(spdb, lower = list(continuous= "smooth")) + theme_grey(base_size = 8)
-#ggpairs(sphuc, lower = list(continuous= "smooth"))
-#ggpairs(dbhuc, lower = list(continuous= "smooth"))
+ggpairs(spdb, lower = list(continuous= "smooth")) + theme_grey(base_size = 8)
+ggpairs(sphuc, lower = list(continuous= "smooth"))
+ggpairs(dbhuc, lower = list(continuous= "smooth"))
 
 ############################## Create and Compare Models #####################################################
 ##############################################################################################################
