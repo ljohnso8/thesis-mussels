@@ -11,7 +11,8 @@ library(nlme)
 finalmodel <- as.tibble(read.csv("FinalModel.csv"), colnames = TRUE)
 #model w/o zinc cr
 finalmodel <- finalmodel%>%
-  filter(!site_id == "ZINCCMP")
+  filter(!site_id == "ZINCCMP") %>%
+  filter(total_count > 1)  # only aggregations that are more than 1 mussel
   
 
 # Stepwise Regression using all Laura sites from 2018 & 2020
@@ -22,16 +23,33 @@ step$anova  #display results
 
 #Look at Summaries of Models
 
-#Stepwise Regression Model with all sites
 mod1 <- lm(log(finalmodel$total_count + .01) ~ finalmodel$DB_Pforest + finalmodel$SP_10yr + finalmodel$HUC_Pth)
 summary(mod1)
+
+
+#Assumption of linearity
+ggplot(finalmodel) + geom_point(aes(x = DB_Pforest, y = log(total_count))) #Yes
+ggplot(finalmodel) + geom_point(aes(x = SP_10yr, y = log(total_count))) #Not much linearity here!!!
+ggplot(finalmodel) + geom_point(aes(x = HUC_Pth, y = log(total_count))) #Hard to tell b/c of low sample size
+
+
+#Examine histogram of the residual values to determine if they are normally distributed
+ggplot(mod1) + geom_histogram(aes(mod1$residuals)) + labs(x = "Residual Values", y = "Count") +
+  ggtitle("Distribution of Residuals from Log(abundance) ~ Final Model")
+
+# Determine mean of residual values
+print(mean(mod1$residuals)) # YES the mean of residuals = 0!!! 
+
+# Assumption of homoscedasticity of residuals
 mod1.res <- resid(mod1)
-plot(finalmodel$DB_Pforest, drain_model.res)
+plot(finalmodel$DB_Pforest, mod1.res) #No... greater variance at higher % forest
 abline(0,0)
-plot(finalmodel$SP_10yr, drain_model.res)
+plot(finalmodel$SP_10yr, mod1.res) # Ok... still unequal vertical variance but better horizontal variance
 abline(0,0)
-plot(finalmodel$HUC_Pth, drain_model.res)
+plot(finalmodel$HUC_Pth, mod1.res) # Less variance of errors at low percent of timber harvest in the HUC
 abline(0,0)
+
+
 
 
 
@@ -54,13 +72,7 @@ anova(modA, mod1) #Results: Step-wise regression indicates DB_Pforest and HUC_Pa
 anova(nozinc, modA) #Results: If I am reading this correctly, adding the HUC_Pth variable does significantly reduce
 #the residuals but including the SP_10YR does not
 
-#What about a model with only DB_Pforest and HUC_Pth?
-modC <- lm(log(finalmodel_nozinc$total_count + .01) ~ finalmodel_nozinc$HUC_Pth)
-summary(modC)
-anova(nozinc, modC)
 
-modD <- lm(log(finalmodel_nozinc$total_count + .01) ~ finalmodel_nozinc$DB_Pforest + finalmodel_nozinc$HUC_Pth)
-summary(modD)
 
 
 
@@ -88,26 +100,43 @@ riverDistplot <- ggplot(finalmodel_SUMP, aes(finalmodel_SUMP$dist_km, finalmodel
 riverDistplot <- riverDistplot + labs(color = "Asian clams \npresent") 
 
 ##################### Drainage Basin Area VS Abundance Plot ###########################################
+
+#Bring in site distance / drainage basin data
+distarea <- as.tibble(read.csv("dist_area_final.csv"), colnames = TRUE)
+# Need to link drainage basin areas with site id
 drainmodel <- finalmodel %>%
   inner_join(distarea, by = "obs_id")
 
-
 drain_model <- lm(log(drainmodel$total_count + .01) ~ drainmodel$drain_area)
 summary(drain_model)
+
+#Examine histogram of the residual values to determine if they are normally distributed
+ggplot(drain_model) + geom_histogram(aes(drain_model$residuals)) + labs(x = "Residual Values", y = "Count") +
+  ggtitle("Distribution of Residuals from Log(abundance) ~ Drainage Basin Area Regression")
+
+# Determine mean of residual values
+print(mean(drain_model$residuals)) # YES the mean of residuals = 0!!! 
+
+# Assess whether residuals meet assumption of homoscedasticity
 drain_model.res <- resid(drain_model)
 plot(drainmodel$drain_area, drain_model.res)
-abline(0,0)
+abline(0,0) #Looks like greater variance at lower drainage basin areas than larger drainage basin areas... this is also
+             # the sites where there were lots of low abundance aggregations but also high abundances, too! All of the 
+            # abundances in the larger drainage basin area sites were much more similar to each other (less range b/w
+            # aggregation abundance)
+
+# Residual Plot
+ggplot(drain_model) + geom_point(aes(x = drain_model$fitted.values, y = drain_model$residuals)) + 
+  labs(x = "Predicted log(Mussel Abundance) Values", y = "Residual Values") + ggtitle("Abundance ~ Drainage Basin Area Residual Plot") 
+
+
+
 
 #Try fitting model with Generalized Least Squares
 drain_model.gls <- lm.gls(log(drainmodel$total_count + .01) ~ drainmodel$drain_area, weights(drainmodel$drain_area)
 summary(drain_model.gls)
 
 
-#Bring in site distance / drainage basin data
-distarea <- as.tibble(read.csv("dist_area_final.csv"), colnames = TRUE)
-# Need to link drainage basin areas with site id
-
-distarea_SUMP <- distarea[1:46,]
 
 
 
