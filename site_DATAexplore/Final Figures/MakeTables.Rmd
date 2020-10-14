@@ -1,0 +1,32 @@
+---
+title: "Make Some Tables"
+author: "Laura Johnson"
+date: "10/12/2020"
+output:
+  pdf_document: default
+  html_document:
+    df_print: paged
+  word_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+Metadata Table 1
+```{r, echo = FALSE}
+setwd("/Users/williamjohnson/Desktop/Laura/Hallett_Lab/Repositories/thesis-mussels/site_DATAexplore")
+library(kableExtra)
+library(tidyverse)
+
+#Bring in .csv file
+table1 <- as.tibble(read.csv("MetaDataTable1.csv"), colnames = TRUE)
+#Make it into a table
+table1 %>%
+  #Rename column names %>%
+  kable(col.names = c("Site ID", "Location", "Survey Length (km)", "Reach Length (km)", "Slope Gradient", "Av. Width (m)", "D.B. Area (km^2)", "HUC12 Area (km^2)", "Q10 Stream Power", "D.B. Perc. Forest", "HUC12 Perc. T.H.")) %>%
+  kable_styling(bootstrap_options = "striped")
+
+
+```
+
+
