@@ -23,6 +23,8 @@ quadcount_cowexcavated <- nrow(cowex)
 quadcount_cowtotal <- nrow(cow01cen1)
 # Return count of number of mussels found at surface in all units that were double sampled
 sum_cowsurfex <- sum(cowex$Surface_Live)
+# return count of total mussels counted at surface in all units
+totalsumcowsurfex <- sum(cow01cen1$Surface_Live)
 
 # Create new object 'burial_factor' 
 burialfactor_cow01 <- (sum_cowsurfex + sum_cowexcavatedlive) / sum_cowsurfex
@@ -38,6 +40,21 @@ density_cow01 <- realnum_cow01/surveyarea_cow01
 print(density_cow01)
 
 max(cow01cen1$Surface_Live, na.rm = TRUE)
+
+# Mean length
+cowcen2 <- cow01cen2 %>%
+  filter(L_or_D == "L") %>%
+# Juveniles
+  filter(Length_cm <= 3.0)
+
+# 7 juveniles out of 97 measured animals = .072
+
+mean(cowcen2$Length_cm)
+
+# Juveniles
+
+
+
 
 ################################################################################
 ### time for visualization!
@@ -90,17 +107,37 @@ ggplot(cowmazzacano_hist, aes(x = size_class, y = percent_pop)) + geom_col(fill 
   ylab("Percent of Population (n = 97)") + ggtitle("COW01 Western Pearlshell Population Size Distribution") +
   theme(plot.title = element_text(face = "bold")) 
 
-# Investigate the different average length of mussels found buried vs. at surface
-exc_hist <- til03_sys2 %>%
+############# Investigate the different average length of mussels found buried vs. at surface  ##############
+# Need to change E and S to excavated and surface in rows
+cow01cen2 <- cow01cen2 %>%
+  mutate(S_or_E = ifelse(S_or_E == "S", "Surface", "Excavated"))
+cowexc_hist <- cow01cen2 %>%
+  filter(L_or_D == "L") %>%
   group_by(S_or_E)%>%
   summarise(av_shell_length = mean(Length_cm))
 # Turn this into a box plot
+cow <- ggplot(cow01cen2, aes(as.factor(S_or_E), Length_cm)) + geom_boxplot() + theme_classic() 
 
-ggplot(til03_sys2, aes(as.factor(S_or_E), Length_cm)) + geom_boxplot() + theme_classic() + 
-  ggtitle("TIL03: Comparison of Excavated (E) VS Surface (S) 
-                             Mussel Lengths (cm)") + labs(x = "Mussel Location", y = "Length (cm)") +
-  theme(plot.title = element_text(face = "bold"))
+cow <- cow + theme(axis.title.x = element_blank()) + scale_y_continuous(name = "Length (cm)", breaks = seq(0,12.5,2.5))
 
+
+
+
+
+# Need to change E and S to excavated and surface in rows
+til03 <- til03 %>%
+  mutate(S_or_E = ifelse(S_or_E == "S", "Surface", "Excavated"))
+
+
+# Investigate the different average length of mussels found buried vs. at surface
+exc_hist <- til03 %>%
+  group_by(S_or_E)%>%
+  summarise(meanshelllength = mean(Length_cm))
+# Turn this into a box plot
+
+til03 <- ggplot(til03, aes(as.factor(S_or_E), Length_cm)) + geom_boxplot() + theme_classic() 
+
+til03 <- til03 + theme(axis.title.x = element_blank()) + scale_y_continuous(name = "Length (cm)", breaks = seq(0,12.5,2.5))
 
 
 
