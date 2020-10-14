@@ -13,6 +13,12 @@ finalmodel <- as.tibble(read.csv("FinalModel.csv"), colnames = TRUE)
 finalmodel <- finalmodel%>%
   filter(!site_id == "ZINCCMP") %>%
   filter(total_count > 1)  # only aggregations that are more than 1 mussel
+
+noHIsp <- finalmodel %>%
+  filter(!site_id == "SR", !site_id == "OB")
+
+noHIspNObky <- noHIsp[13:28,]
+  
   
 
 # Stepwise Regression using all Laura sites from 2018 & 2020
@@ -25,6 +31,31 @@ step$anova  #display results
 
 mod1 <- lm(log(finalmodel$total_count + .01) ~ finalmodel$DB_Pforest + finalmodel$SP_10yr + finalmodel$HUC_Pth)
 summary(mod1)
+
+# Remove high stream power/ high abundance outliers of SR + OB since aggregations
+# clearly linked to microsite refuges
+noHIspMOD <- lm(log(noHIsp$total_count + .01) ~ noHIsp$SP_10yr)
+summary(noHIspMOD)
+
+ggplot(noHIsp, aes(x = SP_10yr, y = total_count)) + geom_point() +
+  geom_smooth(method='lm', formula= y~x, aes(group=1), se = FALSE) +
+  xlab("10-yr Specific Stream Power ") + ylab("Mussel Abundance") +
+  scale_y_log10(breaks = trans_breaks("log10", function(x) 10^x), 
+                labels = trans_format("log10", math_format(10^.x))) +
+  theme_bw()
+
+
+Removing BKY sites does not improve sig. of model coefficients
+#noHIspNObkyMOD <- lm(log(noHIspNObky$total_count + .01) ~ noHIspNObky$SP_10yr)
+#summary(noHIspNObkyMOD)
+
+#ggplot(noHIspNObky, aes(x = SP_10yr, y = total_count)) + geom_point() +
+  geom_smooth(method='lm', formula= y~x, aes(group=1), se = FALSE) +
+  xlab("10-yr Specific Stream Power ") + ylab("Mussel Abundance") +
+  scale_y_log10(breaks = trans_breaks("log10", function(x) 10^x), 
+                labels = trans_format("log10", math_format(10^.x))) +
+  theme_bw()
+
 
 
 #Assumption of linearity
@@ -142,9 +173,9 @@ summary(drain_model.gls)
 
 Drainplot <- ggplot(drainmodel, aes(drain_area, total_count, color = clams)) + 
   geom_point() +
-  geom_smooth(method='lm', formula= y~x, aes(group=1)) +
+  geom_smooth(method='lm', formula= y~x, aes(group=1), se = FALSE) +
   theme(axis.text.y = element_text(face = "bold")) +
-  xlab("Drainage Area (mi^2))") +  
+  xlab("Drainage Basin Area (mi^2))") +  
   ylab("Mussel Abundance") + #ggtitle("Mussel Abundance & Invasive Asian Clam Presence \nat Sites on the South Umpqua River, OR") + 
   scale_y_log10(breaks = trans_breaks("log10", function(x) 10^x), 
                 labels = trans_format("log10", math_format(10^.x))) +
@@ -164,27 +195,34 @@ cor(distarea_SUMP$drain_area, distarea_SUMP$riv_dist_mi)
 
 ##################### Model Variables VS Abundance Plot ###########################################
 DBforestPlot <- ggplot(finalmodel, aes(x = DB_Pforest, y = total_count)) + geom_point() +
-  geom_smooth(method='lm', formula= y~x, aes(group=1)) + 
+  geom_smooth(method='lm', formula= y~x, aes(group=1), se = FALSE) + 
   xlab("Drainage Basin Percent Forest") + ylab("Mussel Abundance") +
   scale_y_log10(breaks = trans_breaks("log10", function(x) 10^x), 
                 labels = trans_format("log10", math_format(10^.x))) +
   theme_bw()
 
-HUCagPlot <- ggplot(finalmodel, aes(x = HUC_Pag, y = total_count)) + geom_point() +
-  xlab("HUC12 Percent Agriculture") + 
+DBforestPlot <- DBforestPlot + theme(axis.title.y = element_blank(), axis.text.y = element_blank())
+
+THhucPlot <- ggplot(finalmodel, aes(x = HUC_Pth, y = total_count)) + geom_point() +
+  geom_smooth(method='lm', formula= y~x, aes(group=1), se = FALSE) + 
+  xlab("HUC12 Percent Timber Harvest") + ylab("Mussel Abundance") +
   scale_y_log10(breaks = trans_breaks("log10", function(x) 10^x), 
                 labels = trans_format("log10", math_format(10^.x))) +
   theme_bw()
 
-HUCagPlot <- HUCagPlot + theme(axis.title.y = element_blank(), axis.text.y = element_blank())
+### Use SPplot2 line 240.. it is better
+SPplot <- ggplot(finalmodel, aes(x = SP_10yr, y = total_count)) + geom_point() +
+  geom_smooth(method='lm', formula= y~x, aes(group=1), se = FALSE) + 
+  xlab("10-yr Specific Stream Power ") + ylab("Mussel Abundance") +
+  scale_y_log10(breaks = trans_breaks("log10", function(x) 10^x), 
+                labels = trans_format("log10", math_format(10^.x))) +
+  theme_bw()
 
+SPplot <- SPplot + theme(axis.title.y = element_blank(), axis.text.y = element_blank())
 
+ModelPlot <- plot_grid(Drainplot, DBforestPlot, THhucPlot, SPplot)
 
-
-ModelPlot <- plot_grid(DBforestPlot, HUCagPlot)
-
-save_plot("ModelPlot.jpeg", ModelPlot, ncol = 2, nrow = 1, base_height = 4,
-          base_width = 6)
+save_plot("ModelPlot18.jpeg", ModelPlot, ncol = 2, nrow = 1, base_height = 8, base_width = 6)
 
 #################################  Stream Power Figure ############################################
 
@@ -230,7 +268,7 @@ boxplot <- boxplot + scale_color_gradient2(midpoint = mid, low = "red", mid = "b
 ###################### Stream Power as Bivariate Plot #######################################
 
 # This one is pretty good!
-ggplot(allspecies, aes(x = SP_10yr, y = total_count, color = species)) + geom_point() +
+SPplot2 <- ggplot(allspecies, aes(x = SP_10yr, y = total_count, color = species)) + geom_point() +
   geom_smooth(method='lm', formula= y~x, aes(group=1), se = FALSE) + 
   xlab("10 Year Specific Stream Power") + ylab("Mussel Abundance") +
   scale_y_log10(breaks = trans_breaks("log10", function(x) 10^x), 
